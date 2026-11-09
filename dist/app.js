@@ -13,8 +13,6 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   filter: '<path d="M4 4h16l-6 7v6l-4 2v-8z"/>',
   more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
-  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92z"/>',
-  video: '<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
   smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
   image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
   file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
@@ -68,17 +66,17 @@ const customers = [
 ];
 
 const deals = [
-  { id: 'CJ202611060018', student: '周念', wechat: 'nian_2026', package: '高三数学冲刺 + 联报', owner: '刘芸', company: '青禾教育', amount: '¥16,800', paid: '2026-11-06 10:12', status: '待财务确认' },
+  { id: 'CJ202611060018', student: '周念', wechat: 'nian_2026', package: '高三数学冲刺 + 联报', owner: '刘芸', company: '馨然教育', amount: '¥16,800', paid: '2026-11-06 10:12', status: '待财务确认' },
   { id: 'CJ202611050061', student: '林夏', wechat: 'linxia07', package: '高三英语强化班', owner: '双燕', company: '知行教育', amount: '¥8,800', paid: '2026-11-05 17:40', status: '已确认' },
-  { id: 'CJ202611050044', student: '郭思远', wechat: 'guo_sy', package: '物理培优班', owner: '莎莎', company: '青禾教育', amount: '¥6,980', paid: '2026-11-05 14:21', status: '分期中' },
-  { id: 'CJ202611040129', student: '许安然', wechat: 'xuran_26', package: '高三全科联报', owner: '刘芸', company: '青禾教育', amount: '¥24,600', paid: '2026-11-04 19:08', status: '已确认' },
+  { id: 'CJ202611050044', student: '郭思远', wechat: 'guo_sy', package: '物理培优班', owner: '莎莎', company: '馨然教育', amount: '¥6,980', paid: '2026-11-05 14:21', status: '分期中' },
+  { id: 'CJ202611040129', student: '许安然', wechat: 'xuran_26', package: '高三全科联报', owner: '刘芸', company: '馨然教育', amount: '¥24,600', paid: '2026-11-04 19:08', status: '已确认' },
   { id: 'CJ202611030083', student: '秦越', wechat: 'qinyue2026', package: '数学一对一', owner: '双燕', company: '知行教育', amount: '¥12,000', paid: '2026-11-03 11:36', status: '退费审批中' }
 ];
 
 const approvals = [
-  { id: 'CJ202611060018', type: '财务确认', student: '周念', owner: '刘芸', amount: '¥16,800', submitted: '今天 10:14', company: '青禾教育', desc: '微信支付，一次性付清', action: '确认到账' },
+  { id: 'CJ202611060018', type: '财务确认', student: '周念', owner: '刘芸', amount: '¥16,800', submitted: '今天 10:14', company: '馨然教育', desc: '微信支付，一次性付清', action: '确认到账' },
   { id: 'TF202611060003', type: '退费审批', student: '秦越', owner: '双燕', amount: '¥4,000', submitted: '今天 09:38', company: '知行教育', desc: '课程调整，退还未消课时', action: '同意退费' },
-  { id: 'ZF202611050012', type: '作废申请', student: '唐雨晴', owner: '莎莎', amount: '¥9,800', submitted: '昨天 18:26', company: '青禾教育', desc: '院校信息填写错误，需重录', action: '同意作废' },
+  { id: 'ZF202611050012', type: '作废申请', student: '唐雨晴', owner: '莎莎', amount: '¥9,800', submitted: '昨天 18:26', company: '馨然教育', desc: '院校信息填写错误，需重录', action: '同意作废' },
   { id: 'JJ202611050007', type: '客户交接', student: '周念', owner: '刘芸', amount: '—', submitted: '昨天 16:42', company: '企微 03号 → 企微 02号', desc: '老客户重复添加，交回最早归属销售', action: '确认交接' }
 ];
 
@@ -120,7 +118,7 @@ function renderShell() {
       <aside class="sidebar">
         <div class="brand">
           <div class="brand-mark">Q</div>
-          <div class="brand-text"><strong>青禾 SCRM</strong><span>WEWORK CRM</span></div>
+          <div class="brand-text"><strong>馨然 SCRM</strong><span>WEWORK CRM</span></div>
         </div>
         <nav class="nav-group">
           <div class="nav-label">业务中心</div>
@@ -135,7 +133,7 @@ function renderShell() {
       </aside>
       <main class="main-wrap">
         <header class="topbar">
-          <div class="crumb"><span>青禾教育</span><span>/</span><strong>${routeTitles[route]}</strong></div>
+          <div class="crumb"><span>馨然教育</span><span>/</span><strong>${routeTitles[route]}</strong></div>
           <div class="top-actions">
             <div class="role-switch" aria-label="切换演示角色">
               <button class="role-button ${state.role === 'admin' ? 'active' : ''}" data-role="admin">管理员视角</button>
@@ -271,7 +269,7 @@ function chatView() {
     <section class="chat-main">
       <div class="chat-head">
         <div class="chat-contact"><div class="conversation-avatar" style="--avatar-bg:${active.color}">${active.short}<span class="channel-dot">微</span></div><div><strong>${active.name}</strong><span>${active.account}<em class="owner-pill">${icon('userCheck')} 归属：刘芸</em></span></div></div>
-        <div class="chat-actions"><button aria-label="语音">${icon('phone')}</button><button aria-label="视频">${icon('video')}</button><button aria-label="更多">${icon('more')}</button></div>
+        <div class="chat-actions"><button aria-label="更多">${icon('more')}</button></div>
       </div>
       <div class="messages">
         <div class="date-divider">今天 10:08</div>
@@ -327,7 +325,7 @@ function customerDetail(c) {
       <div class="detail-column">
         <div class="detail-block"><div class="detail-title"><strong>基本信息</strong><span>资料来自企微客户档案</span></div><div class="info-grid"><div class="info-cell"><span>客户备注名</span><strong>${c.name}（家长）</strong></div><div class="info-cell"><span>微信昵称</span><strong>${c.name.slice(0,1)}妈</strong></div><div class="info-cell"><span>年级</span><strong>${c.grade}</strong></div><div class="info-cell"><span>所在省份</span><strong>${c.province}</strong></div><div class="info-cell"><span>院校</span><strong>${c.school}</strong></div><div class="info-cell"><span>手机号</span><strong>138****7621</strong></div></div></div>
         <div class="detail-block"><div class="detail-title"><strong>客户标签</strong><button class="link-btn">编辑标签</button></div><div class="tags">${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}<span class="tag">已签合同</span></div></div>
-        <div class="detail-block"><div class="detail-title"><strong>成交记录</strong><span>2 笔 · 累计 ¥24,600</span></div><div class="order-mini"><div><strong>高三数学冲刺 + 联报</strong><span>2026-11-06 · 青禾教育 · 待确认</span></div><b>¥16,800</b></div><div class="order-mini"><div><strong>暑期数学强化班</strong><span>2026-07-18 · 青禾教育 · 已确认</span></div><b>¥7,800</b></div></div>
+        <div class="detail-block"><div class="detail-title"><strong>成交记录</strong><span>2 笔 · 累计 ¥24,600</span></div><div class="order-mini"><div><strong>高三数学冲刺 + 联报</strong><span>2026-11-06 · 馨然教育 · 待确认</span></div><b>¥16,800</b></div><div class="order-mini"><div><strong>暑期数学强化班</strong><span>2026-07-18 · 馨然教育 · 已确认</span></div><b>¥7,800</b></div></div>
       </div>
       <div class="detail-column">
         <div class="detail-block"><div class="detail-title"><strong>添加记录</strong><span>永久保留 · 不可删除</span></div><div class="record-timeline"><div class="record-node first" style="--node:#08a883"><strong>企微 ${firstAccount}号 · ${c.owner}</strong><span>2025-07-11 11:23:09<br/>账号：wxwork_${firstAccount}</span><div class="record-actions"><button class="btn btn-sm" data-route="chat">打开会话</button></div></div><div class="record-node" style="--node:#e69324"><strong>企微 ${secondaryAccount}号 · ${secondaryOwner}</strong><span>2026-11-05 16:18:32<br/>识别为重复添加，等待交回原销售</span><div class="record-actions"><button class="btn btn-sm" data-modal="handover">发起交接</button></div></div></div></div>
@@ -339,7 +337,7 @@ function customerDetail(c) {
 
 function transactionsView() {
   const rows = state.role === 'sales' ? deals.filter(d => d.owner === '刘芸') : deals;
-  const withNew = state.newDeal ? [{ id:'CJ202611060099', student:'周念', wechat:'nian_2026', package:'高三数学冲刺 + 联报', owner:'刘芸', company:'青禾教育', amount:'¥16,800', paid:'刚刚', status:'待财务确认' }, ...rows] : rows;
+  const withNew = state.newDeal ? [{ id:'CJ202611060099', student:'周念', wechat:'nian_2026', package:'高三数学冲刺 + 联报', owner:'刘芸', company:'馨然教育', amount:'¥16,800', paid:'刚刚', status:'待财务确认' }, ...rows] : rows;
   return `${pageHead('Transactions', '成交管理', state.role === 'admin' ? '统一管理成交、分期、退费与作废记录。' : '仅展示本人名下成交记录，财务确认前不计入业绩。', `<button class="btn">${icon('export')} 导出当前结果</button><button class="btn btn-primary" data-route="deal">${icon('plus')} 录入成交</button>`)}
     <div class="toolbar"><div class="filters"><div class="search" style="width:220px">${icon('search')}<input placeholder="学员姓名 / 微信昵称" /></div><select class="field-inline"><option>全部状态</option><option>待财务确认</option><option>已确认</option><option>分期中</option></select>${state.role === 'admin' ? '<select class="field-inline"><option>全部销售</option><option>刘芸</option><option>莎莎</option><option>双燕</option></select>' : ''}<input class="field-inline" type="date" value="2026-11-01" /><span>至</span><input class="field-inline" type="date" value="2026-11-06" /></div><button class="btn btn-primary btn-sm">查询</button></div>
     <div class="card table-card"><table class="data-table"><thead><tr><th>成交编号</th><th>学员 / 微信</th><th>班型 / 套餐</th><th>归属销售</th><th>收款主体</th><th>金额</th><th>付款时间</th><th>状态</th><th>操作</th></tr></thead><tbody>
@@ -370,7 +368,7 @@ function dealFormView() {
         <div class="form-field wide"><label>套餐 / 连报<span class="required">*</span></label><div class="package-box"><span class="package-chip">高三数学冲刺 ×</span><span class="package-chip">英语联报 ×</span><button type="button" data-toast="已打开套餐选择演示">+ 添加班级</button></div><div class="field-hint">一个学员可选择多个班级，系统自动统计连报占比。</div></div>
         ${formField('成交金额','<input type="number" value="16800" required />','required')}
         ${formField('付款时间','<input type="datetime-local" value="2026-11-06T10:12" required />','required')}
-        ${formField('收款主体','<select required><option>青禾教育科技有限公司</option><option>知行教育咨询有限公司</option></select>','required')}
+        ${formField('收款主体','<select required><option>馨然教育科技有限公司</option><option>知行教育咨询有限公司</option></select>','required')}
         ${formField('付款方式','<select required><option>微信支付</option><option>支付宝</option><option>银行转账</option></select>','required')}
         ${formField('归属销售','<input value="刘芸（由最早添加记录自动判定）" disabled />')}
         ${formField('最早添加记录','<input value="企微 02号 · 2025-07-11 11:23" disabled />')}
@@ -454,7 +452,7 @@ function showToast(message) {
 
 function exportCsv(index) {
   const headers = ['学员姓名','微信昵称','年级','班型','套餐','付款时间','金额','收款公司','最早添加账号','最早添加时间','院校','省份','归属销售'];
-  const rows = [headers, ['周念','念','高三','数学冲刺班','数学+英语联报','2026-11-06 10:12','16800','青禾教育','企微02号','2025-07-11 11:23','南京外国语学校','江苏省','刘芸']];
+  const rows = [headers, ['周念','念','高三','数学冲刺班','数学+英语联报','2026-11-06 10:12','16800','馨然教育','企微02号','2025-07-11 11:23','南京外国语学校','江苏省','刘芸']];
   const csv = '\ufeff' + rows.map(row => row.map(v => `"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const a = document.createElement('a'); a.href = url; a.download = `SCRM导出示例_${index + 1}.csv`; a.click(); URL.revokeObjectURL(url);
