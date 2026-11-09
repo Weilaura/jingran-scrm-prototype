@@ -236,6 +236,7 @@ button { cursor: pointer; }
 .info-row span:last-child { color: #4f5971; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 6px; color: #5963a8; background: #f0f1ff; font-size: 9px; }
+.tags-empty { color: #a0a7b7; font-size: 9px; }
 .owner-record { display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 9px; background: #f7f8fb; }
 .owner-record + .owner-record { margin-top: 8px; }
 .owner-record .record-copy { min-width: 0; flex: 1; }
@@ -389,6 +390,29 @@ button { cursor: pointer; }
 .handover-person small { display: block; color: #9ba2b2; font-size: 8px; }
 .handover-person strong { display: block; margin-top: 6px; font-size: 11px; }
 .handover-arrow { text-align: center; color: var(--primary); }
+
+.tag-dialog-intro { margin-bottom: 15px; }
+.tag-dialog-intro strong { display: block; color: var(--ink); font-size: 12px; }
+.tag-dialog-intro span { display: block; margin-top: 5px; color: #8c95a8; font-size: 10px; line-height: 1.5; }
+.tag-search { width: 100%; height: 38px; margin-bottom: 14px; background: #f7f8fb; }
+.tag-picker { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 9px; min-height: 108px; max-height: 186px; overflow: auto; padding: 2px 2px 12px; }
+.tag-option { min-height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 0 11px; border: 1px solid #e1e4ec; border-radius: 8px; color: #69738a; background: #fff; cursor: pointer; font-size: 10px; transition: border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease; user-select: none; }
+.tag-option:hover { border-color: #c9caf7; color: var(--primary); transform: translateY(-1px); }
+.tag-option.selected { border-color: #bfc1f6; color: #4f55bf; background: #f1f1ff; font-weight: 650; }
+.tag-option input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.tag-check { width: 16px; height: 16px; display: grid; place-items: center; border: 1px solid #d5d9e3; border-radius: 5px; color: transparent; background: #fff; }
+.tag-check .icon { width: 11px; height: 11px; }
+.tag-option.selected .tag-check { border-color: var(--primary); color: #fff; background: var(--primary); }
+.tag-no-result { display: none; min-height: 108px; margin-top: -120px; padding-top: 42px; color: #9aa1b2; text-align: center; font-size: 10px; pointer-events: none; }
+.tag-no-result.visible { display: block; }
+.tag-create { margin-top: 5px; padding-top: 16px; border-top: 1px solid var(--line); }
+.tag-create > label { display: block; margin-bottom: 8px; color: #566078; font-size: 10px; font-weight: 650; }
+.tag-create-row { display: flex; gap: 8px; }
+.tag-create-row input { height: 38px; min-width: 0; flex: 1; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; outline: none; color: var(--ink); background: #fff; font-size: 10px; }
+.tag-create-row input:focus { border-color: #bfc1f6; box-shadow: 0 0 0 3px #efefff; }
+.tag-create-row .btn { height: 38px; }
+.tag-selection-count { margin-right: auto; color: #8b94a8; font-size: 10px; }
+.tag-selection-count strong { color: var(--primary); }
 
 #toast-root { position: fixed; right: 22px; top: 92px; z-index: 100; display: grid; gap: 8px; }
 .toast { min-width: 300px; display: flex; align-items: center; gap: 10px; padding: 13px 15px; border: 1px solid #dce2ea; border-radius: 11px; color: #354057; background: #fff; box-shadow: 0 14px 40px rgba(20,31,67,.16); animation: toast-in .2s ease; font-size: 11px; }

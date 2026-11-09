@@ -44,8 +44,20 @@ const state = {
   activeApproval: 0,
   confirmedApprovals: new Set(),
   newDeal: false,
-  customerQuery: ''
+  customerQuery: '',
+  customerTags: {
+    '周念': ['26届联报', '数学冲刺', '已成交'],
+    '陈一诺家长': ['意向A', '家长', '重点跟进'],
+    '26届联报咨询群': ['26届', '联报咨询'],
+    '林夏': ['数学强化', '已成交'],
+    '袁嘉乐': ['未回复', '待跟进'],
+    '高三冲刺A班': ['高三', '冲刺班'],
+    '吴颖': ['新客户', '待跟进']
+  }
 };
+
+const tagLibrary = ['26届联报', '数学冲刺', '已成交', '重点跟进', '意向A', '家长', '待跟进', '新客户', '未回复', '高三', '联报咨询', '已签合同'];
+const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 
 const conversations = [
   { name: '周念', short: '周', color: '#e88a72', account: '企微 02号', time: '10:24', preview: '好的老师，我晚点把合同发您', unread: 2, type: 'direct' },
@@ -253,6 +265,7 @@ function dashboardActivities(isAdmin) {
 function chatView() {
   const active = conversations[state.activeConversation] || conversations[0];
   const filtered = state.chatTab === 'all' ? conversations : conversations.filter(c => c.type === state.chatTab);
+  const activeTags = state.customerTags[active.name] || [];
   return `<div class="chat-workspace">
     <aside class="chat-panel">
       <div class="chat-tools">
@@ -289,7 +302,7 @@ function chatView() {
       <div class="profile-head"><div class="profile-avatar">${active.short}</div><strong>${active.name}</strong><span>微信昵称：念 · 外部联系人</span></div>
       <div class="duplicate-alert">${icon('warning')}<div><strong>检测到 2 条添加记录</strong><br/>最早由企微 02号添加，归属销售为刘芸。</div></div>
       <div class="profile-section"><div class="section-head"><strong>客户信息</strong><button data-route="customers">查看详情</button></div>${infoRow('客户备注名','周念（家长）')}${infoRow('手机号','138****7621')}${infoRow('年级 / 院校','高三 · 南京外国语学校')}${infoRow('所在省份','江苏省')}</div>
-      <div class="profile-section"><div class="section-head"><strong>标签</strong><button>+ 添加</button></div><div class="tags"><span class="tag">26届联报</span><span class="tag">数学冲刺</span><span class="tag">已成交</span></div></div>
+      <div class="profile-section"><div class="section-head"><strong>标签</strong><button data-modal="tags">+ 添加</button></div><div class="tags customer-tags">${activeTags.length ? activeTags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('') : '<span class="tags-empty">暂未添加标签</span>'}</div></div>
       <div class="profile-section"><div class="section-head"><strong>添加记录</strong><button data-modal="records">全部 2 条</button></div><div class="owner-record"><span class="mini-avatar" style="--avatar:#6b74d7">02</span><div class="record-copy"><strong>企微 02号 · 刘芸</strong><span>2025-07-11 11:23 · 最早添加</span></div><button class="btn btn-sm" data-toast="已切换至企微 02号会话">会话</button></div><div class="owner-record"><span class="mini-avatar" style="--avatar:#4d9b8a">03</span><div class="record-copy"><strong>企微 03号 · 莎莎</strong><span>2026-11-05 16:18 · 待交接</span></div><button class="btn btn-sm" data-modal="handover">交接</button></div></div>
     </aside>
   </div>`;
@@ -428,7 +441,11 @@ const permissionRow = (label, values) => `<tr><td>${label}</td>${values.map(v =>
 
 function openModal(type) {
   const root = document.querySelector('#modal-root');
+  const active = conversations[state.activeConversation] || conversations[0];
+  const selectedTags = state.customerTags[active.name] || [];
+  const availableTags = [...new Set([...tagLibrary, ...selectedTags])];
   const modals = {
+    tags: { title: '添加客户标签', small: true, body: `<div class="tag-dialog-intro"><strong>为 ${escapeHtml(active.name)} 添加标签</strong><span>标签仅内部可见，可多选，也可以快速新建标签。</span></div><div class="tag-search search">${icon('search')}<input id="tag-search" placeholder="搜索标签" autocomplete="off" /></div><div class="tag-picker" id="tag-picker">${availableTags.map(tag => `<label class="tag-option ${selectedTags.includes(tag) ? 'selected' : ''}" data-label="${escapeHtml(tag)}"><input type="checkbox" value="${escapeHtml(tag)}" ${selectedTags.includes(tag) ? 'checked' : ''}/><span class="tag-check">${icon('check')}</span><span>${escapeHtml(tag)}</span></label>`).join('')}</div><div class="tag-no-result" id="tag-no-result">没有找到匹配标签，可以在下方新建</div><div class="tag-create"><label for="new-tag-input">新建标签</label><div class="tag-create-row"><input id="new-tag-input" maxlength="12" placeholder="输入标签名称，最多 12 个字" autocomplete="off"/><button class="btn" type="button" data-add-custom-tag>${icon('plus')} 添加</button></div><div class="field-hint">同名标签不会重复创建</div></div>`, foot: `<span class="tag-selection-count">已选择 <strong id="tag-selected-count">${selectedTags.length}</strong> 个标签</span><button class="btn" data-close-modal>取消</button><button class="btn btn-primary" data-save-tags>确认添加</button>` },
     records: { title: '客户添加记录', body: `<div class="duplicate-alert" style="margin:0 0 16px">${icon('warning')}<div>最早添加记录决定业绩归属。记录永久保留，即使客户删除好友也不会清除。</div></div><table class="record-table"><thead><tr><th>客户</th><th>添加账号 / 销售</th><th>添加时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>周念</strong><br/><span class="first-owner">最早添加</span></td><td>企微 02号<br/><span>刘芸</span></td><td>2025-07-11<br/>11:23:09</td><td><button class="btn btn-sm" data-toast="已切换至企微 02号会话">发起会话</button></td></tr><tr><td><strong>周念</strong></td><td>企微 03号<br/><span>莎莎</span></td><td>2026-11-05<br/>16:18:32</td><td><button class="btn btn-sm" data-modal="handover">发起交接</button></td></tr></tbody></table>`, foot: '<button class="btn" data-close-modal>关闭</button>' },
     handover: { title: '发起客户交接', small: true, body: `<div class="handover-flow"><div class="handover-person"><small>当前添加账号</small><strong>企微 03号 · 莎莎</strong></div><div class="handover-arrow">${icon('arrowRight')}</div><div class="handover-person"><small>最早归属账号</small><strong>企微 02号 · 刘芸</strong></div></div><div class="form-field"><label>交接备注<span class="required">*</span></label><textarea id="handover-note">这是你的老客户，已重新添加企微 03号，请继续跟进。</textarea><div class="field-hint">备注仅内部可见，客户不会收到任何通知。</div></div>`, foot: '<button class="btn" data-close-modal>取消</button><button class="btn btn-primary" data-handover-submit>确认交接</button>' },
     void: { title: '发起订单作废', small: true, body: `<div class="form-field"><label>作废原因<span class="required">*</span></label><select><option>客户信息填写错误</option><option>班型 / 套餐录入错误</option><option>重复录入</option><option>其他</option></select></div><div class="form-field" style="margin-top:14px"><label>原因说明</label><textarea placeholder="请输入具体原因"></textarea><div class="field-hint">提交后由管理员审批，原订单和操作记录将保留。</div></div>`, foot: '<button class="btn" data-close-modal>取消</button><button class="btn btn-danger" data-modal-submit="作废申请已提交，等待管理员审批">提交申请</button>' },
@@ -436,7 +453,8 @@ function openModal(type) {
   };
   const modal = modals[type];
   if (!modal) return;
-  root.innerHTML = `<div class="modal-backdrop" data-backdrop><div class="modal ${modal.small ? 'modal-sm' : ''}" role="dialog" aria-modal="true"><div class="modal-head"><div class="modal-title">${modal.title}</div><button class="modal-close" data-close-modal>${icon('close')}</button></div><div class="modal-body">${modal.body}</div><div class="modal-foot">${modal.foot}</div></div></div>`;
+  root.innerHTML = `<div class="modal-backdrop" data-backdrop><div class="modal ${modal.small ? 'modal-sm' : ''}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div class="modal-title" id="modal-title">${modal.title}</div><button class="modal-close" data-close-modal aria-label="关闭弹框">${icon('close')}</button></div><div class="modal-body">${modal.body}</div><div class="modal-foot">${modal.foot}</div></div></div>`;
+  if (type === 'tags') window.setTimeout(() => document.querySelector('#tag-search')?.focus(), 0);
 }
 
 function closeModal() { document.querySelector('#modal-root').innerHTML = ''; }
@@ -448,6 +466,43 @@ function showToast(message) {
   el.innerHTML = `<span class="toast-icon">✓</span><span>${message}</span>`;
   root.appendChild(el);
   window.setTimeout(() => el.remove(), 2600);
+}
+
+function updateTagSelectionCount() {
+  const count = document.querySelectorAll('#tag-picker input[type="checkbox"]:checked').length;
+  const counter = document.querySelector('#tag-selected-count');
+  if (counter) counter.textContent = String(count);
+}
+
+function addCustomTag() {
+  const input = document.querySelector('#new-tag-input');
+  const picker = document.querySelector('#tag-picker');
+  if (!input || !picker) return;
+  const value = input.value.trim();
+  if (!value) { input.focus(); showToast('请输入标签名称'); return; }
+  const existing = [...picker.querySelectorAll('input[type="checkbox"]')].find(item => item.value.toLowerCase() === value.toLowerCase());
+  if (existing) {
+    existing.checked = true;
+    existing.closest('.tag-option')?.classList.add('selected');
+    existing.closest('.tag-option')?.scrollIntoView({ block: 'nearest' });
+  } else {
+    const label = document.createElement('label');
+    label.className = 'tag-option selected';
+    label.dataset.label = value;
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox'; checkbox.value = value; checkbox.checked = true;
+    const check = document.createElement('span');
+    check.className = 'tag-check'; check.innerHTML = icon('check');
+    const text = document.createElement('span'); text.textContent = value;
+    label.append(checkbox, check, text);
+    picker.prepend(label);
+  }
+  input.value = '';
+  document.querySelector('#tag-search').value = '';
+  picker.querySelectorAll('.tag-option').forEach(option => { option.hidden = false; });
+  document.querySelector('#tag-no-result')?.classList.remove('visible');
+  updateTagSelectionCount();
+  input.focus();
 }
 
 function exportCsv(index) {
@@ -475,6 +530,16 @@ document.addEventListener('click', (event) => {
   if (toast) { showToast(toast.dataset.toast); return; }
   const modalSubmit = event.target.closest('[data-modal-submit]');
   if (modalSubmit) { closeModal(); showToast(modalSubmit.dataset.modalSubmit); return; }
+  if (event.target.closest('[data-add-custom-tag]')) { addCustomTag(); return; }
+  if (event.target.closest('[data-save-tags]')) {
+    const active = conversations[state.activeConversation] || conversations[0];
+    const selected = [...document.querySelectorAll('#tag-picker input[type="checkbox"]:checked')].map(input => input.value);
+    state.customerTags[active.name] = selected;
+    closeModal();
+    renderShell();
+    showToast(`已为${active.name}保存 ${selected.length} 个标签`);
+    return;
+  }
   if (event.target.closest('[data-handover-submit]')) { closeModal(); showToast('客户已交接给刘芸，客户侧无感知'); return; }
   const approval = event.target.closest('[data-approval]');
   if (approval) { state.activeApproval = Number(approval.dataset.approval); renderShell(); return; }
@@ -491,6 +556,28 @@ document.addEventListener('input', (event) => {
     window.clearTimeout(window.__customerSearchTimer);
     window.__customerSearchTimer = window.setTimeout(() => renderShell(), 180);
   }
+  if (event.target.matches('#tag-search')) {
+    const query = event.target.value.trim().toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('#tag-picker .tag-option').forEach(option => {
+      const match = option.dataset.label.toLowerCase().includes(query);
+      option.hidden = !match;
+      if (match) visible += 1;
+    });
+    document.querySelector('#tag-no-result')?.classList.toggle('visible', visible === 0);
+  }
+});
+
+document.addEventListener('change', (event) => {
+  if (event.target.matches('#tag-picker input[type="checkbox"]')) {
+    event.target.closest('.tag-option')?.classList.toggle('selected', event.target.checked);
+    updateTagSelectionCount();
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.querySelector('.modal-backdrop')) closeModal();
+  if (event.key === 'Enter' && event.target.matches('#new-tag-input')) { event.preventDefault(); addCustomTag(); }
 });
 
 document.addEventListener('submit', (event) => {
