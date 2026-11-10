@@ -17,7 +17,7 @@ export const ROUTES = [
   { id: 'statistics', title: '项目统计', icon: 'dashboard', description: '项目成交数量、金额及销售排名' },
   { id: 'materials', title: '素材库', icon: 'image', description: '共享文件、图片与成交凭证素材' },
   { id: 'phrases', title: '快捷回复', icon: 'message', description: '创建、维护并在会话中使用个人话术' },
-  { id: 'export', title: '数据导出', icon: 'export', description: '按会议确认的收款明细表头筛选并导出销售数据' },
+  { id: 'export', title: '数据导出', icon: 'export', description: '按销售、时间、年级、院校、生源地等维度导出业务数据' },
   { id: 'settings', title: '系统设置', icon: 'settings', description: '企微账号、标签同步、角色和数据范围' }
 ];
 
@@ -39,8 +39,18 @@ export const PAYMENT_EXPORT_FIELDS = [
   '最早添加账号', '最早添加时间', '院校', '省份', '订单类型', '归属销售', '转介绍老师',
   '地区 / 批次', '收款方式', '合同', '归属状态', '到账状态', '来源', '录入人'
 ];
+export const WEEKLY_INTENT_EXPORT_FIELDS = ['客户', '微信昵称', '意向阶段', '意向标签', '最近咨询项目', '最近咨询内容', '归属销售', '企微账号', '本周跟进日期', '联系电话'];
+export const CONSULTATION_EXPORT_FIELDS = ['客户', '微信昵称', '咨询项目', '咨询内容', '记录类型', '登记销售', '登记时间', '下次回访', '企微账号', '客户标签'];
+export const PERFORMANCE_EXPORT_FIELDS = ['销售', '成交笔数', '成交客户数', '已到账金额（元）', '目标金额（元）', '完成率', '退费金额（元）'];
+export const REFUND_EXPORT_FIELDS = ['申请编号', '客户', '关联成交', '退费金额（元）', '原因', '状态', '申请时间'];
+export const CUSTOMER_EXPORT_FIELDS = ['客户', '微信昵称', '联系电话', '年级', '院校', '生源地', '来源', '企微账号', '归属销售', '添加时间'];
 export const EXPORTS = {
-  payments: { title: '收款明细', description: '总表与销售个人表使用同一字段结构', roles: ['admin', 'supervisor', 'sales'], policy: 'records' }
+  weeklyIntent: { title: '本周意向客户', description: '销售每周汇总本周需要持续跟进的意向客户。', icon: 'users', tone: 'violet', roles: ['admin', 'supervisor', 'sales'], policy: 'records' },
+  consultations: { title: '咨询记录', description: '一键导出咨询项目、咨询内容、登记销售与回访计划。', icon: 'file', tone: 'blue', roles: ['admin', 'supervisor', 'sales'], policy: 'records' },
+  payments: { title: '成交与收款明细', description: '包含学员、班型、套餐、金额、收款主体与归属销售。', icon: 'deal', tone: 'teal', roles: ['admin', 'supervisor', 'sales'], policy: 'records' },
+  performance: { title: '销售业绩汇总', description: '按销售汇总成交笔数、人数、到账金额与目标完成率。', icon: 'dashboard', tone: 'indigo', roles: ['admin', 'supervisor', 'sales'], policy: 'records' },
+  refunds: { title: '退费与作废明细', description: '保留申请、审批、关联成交与退费原因的完整记录。', icon: 'clock', tone: 'rose', roles: ['admin', 'supervisor', 'sales'], policy: 'records' },
+  customers: { title: '客户添加记录', description: '导出最早添加账号、添加时间及客户来源等信息。', icon: 'export', tone: 'purple', roles: ['admin', 'supervisor', 'sales'], policy: 'records' }
 };
 
 export const PENDING = {

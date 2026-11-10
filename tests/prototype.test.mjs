@@ -5,7 +5,7 @@ import { buildExport, createState, project, reduce, resolveRoute } from '../dist
 import { renderModal, renderShell } from '../dist/views.js';
 
 const fresh = () => createState(structuredClone(PREVIEW_DATA));
-const ui = { activeConversationId: 'conv-zhou', pinnedConversationIds: new Set(['conv-zhou']), activeAccountId: 'acc-02', chatTab: 'all', composerText: '' };
+const ui = { activeConversationId: 'conv-zhou', pinnedConversationIds: new Set(['conv-zhou']), activeAccountId: 'acc-02', chatTab: 'all', composerText: '', exportHistory: [] };
 
 test('navigation exposes the detailed SCRM workbench requested by the product owner', () => {
   const ids = ROUTES.map(row => row.id);
@@ -49,9 +49,17 @@ test('sales dashboard follows the meeting video metrics, scope and settlement ru
   assert.ok(renderShell('dashboard', { ...admin, ui }).includes('设置月度目标'));
 });
 
-test('data export uses the single 23-column payment-detail schema shown in meeting video', () => {
+test('data export provides six business exports including weekly intentions and one-click consultations', () => {
   const data = project(fresh());
-  assert.deepEqual(data.exports.map(row => row.id), ['payments']);
+  assert.deepEqual(data.exports.map(row => row.id), ['weeklyIntent', 'consultations', 'payments', 'performance', 'refunds', 'customers']);
+  const intent = buildExport(data, 'weeklyIntent');
+  assert.equal(intent.status, 'ready');
+  assert.equal(intent.rows.length, 3);
+  assert.deepEqual(intent.headers.slice(0, 4), ['客户', '微信昵称', '意向阶段', '意向标签']);
+  const consultations = buildExport(data, 'consultations');
+  assert.equal(consultations.status, 'ready');
+  assert.equal(consultations.rows.length, 2);
+  assert.deepEqual(consultations.headers.slice(0, 4), ['客户', '微信昵称', '咨询项目', '咨询内容']);
   const exported = buildExport(data, 'payments');
   assert.equal(exported.status, 'ready');
   assert.equal(exported.headers.length, 23);
@@ -59,8 +67,9 @@ test('data export uses the single 23-column payment-detail schema shown in meeti
   assert.deepEqual(exported.headers.slice(-6), ['收款方式', '合同', '归属状态', '到账状态', '来源', '录入人']);
   assert.equal(exported.rows.length, 3);
   const html = renderShell('export', { ...data, ui });
-  ['收款明细总表', '统一表结构', '付款开始日期', '付款结束日期', '年级', '班型', '套餐', '归属销售', '到账状态', '导出当前结果'].forEach(label => assert.ok(html.includes(label), label));
-  ['客户基础资料', '销售业绩报表', '选择字段'].forEach(label => assert.equal(html.includes(label), false, label));
+  ['本周意向客户', '咨询记录', '成交与收款明细', '销售业绩汇总', '退费与作废明细', '客户添加记录', '最近导出', '导出记录'].forEach(label => assert.ok(html.includes(label), label));
+  const recordsHtml = renderShell('records', { ...data, ui });
+  assert.ok(recordsHtml.includes('data-export="consultations"'));
 });
 
 test('deal entry retains project, screenshot and post-deal contract status', () => {

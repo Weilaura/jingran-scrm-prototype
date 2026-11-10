@@ -1,6 +1,6 @@
-import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js';
-import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js';
-import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-chat-tabs';
+import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js?v=20261110-export-hub';
+import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js?v=20261110-export-hub';
+import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-export-hub';
 
 let state = createState(structuredClone(PREVIEW_DATA));
 let projection = project(state);
@@ -9,7 +9,11 @@ let ui = {
   pinnedConversationIds: new Set(['conv-zhou']),
   activeAccountId: 'acc-02',
   chatTab: 'all',
-  composerText: ''
+  composerText: '',
+  exportHistory: [
+    { fileName: '咨询记录-2026-11.csv', type: '咨询记录', scope: '2026年11月', actor: '刘芸', time: '2026-11-10 09:18', status: '已完成' },
+    { fileName: '本周意向客户-2026-11-09_2026-11-15.csv', type: '本周意向客户', scope: '本周 11/09—11/15', actor: '刘芸', time: '2026-11-10 08:42', status: '已完成' }
+  ]
 };
 let previewUrl = null;
 let revision = 0;
@@ -117,6 +121,11 @@ const exportCsv = kind => {
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${result.title}.csv`; anchor.click();
   URL.revokeObjectURL(url);
+  const time = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()).replaceAll('/', '-');
+  const actor = projection.role === 'sales' ? '刘芸' : projection.role === 'supervisor' ? '主管' : '管理员';
+  ui = { ...ui, exportHistory: [{ fileName: `${result.title}.csv`, type: result.exportLabel, scope: result.scopeLabel, actor, time, status: '已完成' }, ...(ui.exportHistory ?? [])].slice(0, 8) };
+  renderShell();
+  showToast(`已导出 ${result.rows.length} 条${result.exportLabel}`);
 };
 const queryFocus = element => {
   document.querySelector(`[data-query-section="${element.dataset.query}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });

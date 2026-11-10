@@ -1,4 +1,4 @@
-import { COMMAND_POLICY, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PAYMENT_EXPORT_FIELDS, PENDING, RECORD_KINDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT } from './contracts.js';
+import { COMMAND_POLICY, CONSULTATION_EXPORT_FIELDS, CUSTOMER_EXPORT_FIELDS, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PAYMENT_EXPORT_FIELDS, PERFORMANCE_EXPORT_FIELDS, PENDING, RECORD_KINDS, REFUND_EXPORT_FIELDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT, WEEKLY_INTENT_EXPORT_FIELDS } from './contracts.js?v=20261110-export-hub';
 
 const blankFilters = () => ({ query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' });
 
@@ -126,6 +126,47 @@ export const project = state => {
     return { date, label: date.slice(5).replace('-', '/'), amount: amount(confirmedOrders.filter(row => row.createdDate === date)) };
   });
   const exportPreview = { headers: PAYMENT_EXPORT_FIELDS, rows: paymentRows(orders, allCustomers) };
+  const consultationRecords = records.filter(row => row.kind === 'consultation');
+  const weeklyIntentCustomers = allCustomers.filter(row => row.stage !== '已成交' && row.nextVisit >= weekStart && row.nextVisit <= weekEnd);
+  const exportDatasets = {
+    weeklyIntent: {
+      headers: WEEKLY_INTENT_EXPORT_FIELDS,
+      rows: weeklyIntentCustomers.map(customer => {
+        const latest = consultationRecords.filter(row => row.customerId === customer.id).sort((a, b) => b.createdDate.localeCompare(a.createdDate))[0];
+        return [customer.name, customer.wechat, customer.stage, customer.tags.join('、'), latest?.project || '—', latest?.content || '—', customer.ownerName, customer.account, customer.nextVisit, customer.phone];
+      }),
+      suffix: `${weekStart}_${weekEnd}`,
+      rangeLabel: `本周 ${weekStart.slice(5).replace('-', '/')}—${weekEnd.slice(5).replace('-', '/')}`
+    },
+    consultations: {
+      headers: CONSULTATION_EXPORT_FIELDS,
+      rows: consultationRecords.map(row => {
+        const customer = linkedCustomer(row.customerId) ?? {};
+        return [row.customer, customer.wechat || '—', row.project, row.content, RECORD_KINDS[row.kind], row.recordedByName, row.createdDate, row.nextVisit || '—', customer.account || '—', (customer.tags || []).join('、')];
+      }),
+      suffix: dashboardMonth,
+      rangeLabel: `${dashboardMonth.replace('-', '年')}月`
+    },
+    payments: { ...exportPreview, suffix: dashboardMonth, rangeLabel: `${dashboardMonth.replace('-', '年')}月` },
+    performance: {
+      headers: PERFORMANCE_EXPORT_FIELDS,
+      rows: salesRows.map(row => [row.name, row.orders, row.people, row.performance, row.target || 0, row.completion === null ? '未设置' : `${row.completion}%`, row.refund]),
+      suffix: dashboardMonth,
+      rangeLabel: `${dashboardMonth.replace('-', '年')}月`
+    },
+    refunds: {
+      headers: REFUND_EXPORT_FIELDS,
+      rows: refunds.map(row => [row.id, row.customer, row.orderId, row.amount, row.reason, row.status, row.createdDate]),
+      suffix: dashboardMonth,
+      rangeLabel: `${dashboardMonth.replace('-', '年')}月`
+    },
+    customers: {
+      headers: CUSTOMER_EXPORT_FIELDS,
+      rows: allCustomers.map(row => [row.name, row.wechat, row.phone, row.grade, row.school, row.province, row.source, row.account, row.ownerName, localDate(row.addedAt)]),
+      suffix: dashboardMonth,
+      rangeLabel: `${dashboardMonth.replace('-', '年')}月`
+    }
+  };
   return {
     role: state.role, scope, filters: state.filters, customers, allCustomers, orders, records, routes, accounts: state.accounts,
     conversations: state.conversations.filter(row => allCustomers.some(customer => customer.id === row.customerId)),
@@ -142,7 +183,7 @@ export const project = state => {
       pendingAmount: amount(pendingMonthOrders), pendingCount: pendingMonthOrders.length, refundTotal: monthlyRefundTotal, refundCount: monthRefunds.length,
       periods: { today: todayTotal, week: weekTotal, month: monthTotal, year: yearTotal }, salesRows, weekTrend, message: PENDING.performance
     },
-    exportPreview,
+    exportPreview, exportDatasets,
     projectPerformance, projectOptions: [...new Set(state.orders.filter(row => owns(scope, row)).map(row => row.project))], ownerOptions: [...new Set(allCustomers.map(row => row.ownerName))], sourceOptions: [...new Set(allCustomers.map(row => row.source))],
     gradeOptions: [...new Set(allCustomers.map(row => row.grade))], schoolOptions: [...new Set(allCustomers.map(row => row.school))], provinceOptions: [...new Set(allCustomers.map(row => row.province))],
     dimensions: DIMENSIONS.map(item => ({ ...item, entries: summary(allCustomers, item.key), status: 'ready' })),
@@ -257,6 +298,8 @@ export const reduce = (state, command) => {
 };
 
 export const buildExport = (projection, kind) => {
-  if (kind !== 'payments') return { status: 'blocked', message: PENDING.exports, headers: [], rows: [] };
-  return { status: 'ready', title: `收款明细-${projection.dashboard?.month || '当前筛选'}`, headers: projection.exportPreview.headers, rows: projection.exportPreview.rows };
+  const definition = EXPORTS[kind];
+  const dataset = projection.exportDatasets?.[kind];
+  if (!definition || !dataset) return { status: 'blocked', message: PENDING.exports, headers: [], rows: [] };
+  return { status: 'ready', title: `${definition.title}-${dataset.suffix}`, exportLabel: definition.title, scopeLabel: dataset.rangeLabel, headers: dataset.headers, rows: dataset.rows };
 };
