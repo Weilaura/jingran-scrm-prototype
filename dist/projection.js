@@ -1,6 +1,6 @@
-import { COMMAND_POLICY, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PENDING, RECORD_KINDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT } from './contracts.js';
+import { COMMAND_POLICY, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PAYMENT_EXPORT_FIELDS, PENDING, RECORD_KINDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT } from './contracts.js';
 
-const blankFilters = () => ({ query: '', start: '', end: '', recordKind: '', tag: '', account: '', project: '', owner: '', source: '' });
+const blankFilters = () => ({ query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' });
 
 /** @param {object} input Normalized local preview snapshot; never a provider payload. */
 export const createState = (input = {}) => ({
@@ -43,6 +43,23 @@ const projectSummary = (orders, refunds = []) => [...Map.groupBy(orders, row => 
   refund: refunds.filter(refund => rows.some(order => order.id === refund.orderId)).reduce((sum, row) => sum + Number(row.amount || 0), 0)
 }));
 
+const amount = rows => rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+const shiftDate = (date, days) => {
+  const value = new Date(`${date}T00:00:00+08:00`);
+  value.setUTCDate(value.getUTCDate() + days);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
+};
+const paymentRows = (orders, customers) => orders.map(order => {
+  const customer = customers.find(row => row.id === order.customerId) ?? {};
+  return [
+    customer.grade, order.classType || '—', order.package || order.product, order.subcategory || order.project,
+    customer.wechat, order.customer, order.createdDate || localDate(order.createdAt), Number(order.amount || 0), order.paymentType || '—',
+    customer.account, customer.addedAt ? localDate(customer.addedAt) : '—', customer.school, customer.province,
+    order.orderType || '新签', order.customerOwner, order.referralTeacher || '—', order.regionBatch || '—', order.channel,
+    order.contractStatus, order.ownershipStatus || '已归属', order.arrivalStatus || '已到账', customer.source, order.enteredBy || order.customerOwner
+  ];
+});
+
 /** Resolve scope once; all pages, counters and exports consume this projection. */
 export const project = state => {
   const scope = resolveScope(state);
@@ -54,7 +71,10 @@ export const project = state => {
     return (!state.filters.project || row.project === state.filters.project)
       && (!state.filters.account || customer?.accountId === state.filters.account)
       && (!state.filters.owner || row.customerOwner === state.filters.owner)
-      && (!state.filters.source || customer?.source === state.filters.source);
+      && (!state.filters.source || customer?.source === state.filters.source)
+      && (!state.filters.grade || customer?.grade === state.filters.grade)
+      && (!state.filters.school || customer?.school === state.filters.school)
+      && (!state.filters.province || customer?.province === state.filters.province);
   });
   const records = scopedRows(state.records, scope, state.filters).filter(row => {
     const customer = linkedCustomer(row.customerId);
@@ -70,14 +90,42 @@ export const project = state => {
   const refunds = scopedRows(state.refunds, scope, state.filters).filter(row => visibleOrderIds.has(row.orderId));
   const groups = state.groups.filter(row => owns(scope, row));
   const projectPerformance = projectSummary(orders, refunds).map(row => ({ ...row, net: row.amount - row.refund }));
-  const total = orders.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const total = amount(orders);
   const refundTotal = refunds.reduce((sum, row) => sum + Number(row.amount || 0), 0);
-  // 回访记录意味着该客户已进入过咨询流程；看板按有任一咨询/回访记录的客户去重统计。
-  const consultedIds = new Set(records.map(row => row.customerId));
   const dealtIds = new Set(orders.map(row => row.customerId));
-  const trend = [...Map.groupBy(orders, row => row.createdDate)].map(([date, rows]) => ({ date, count: rows.length, amount: rows.reduce((sum, row) => sum + Number(row.amount || 0), 0) })).sort((a, b) => a.date.localeCompare(b.date));
-  const sourceSummary = summary(customers, 'source');
-  const salesPerformance = [...Map.groupBy(orders, row => row.customerOwner)].map(([owner, rows]) => ({ owner, count: rows.length, amount: rows.reduce((sum, row) => sum + Number(row.amount || 0), 0) }));
+  const dashboardMonth = state.filters.month || '2026-11';
+  const dashboardOrders = state.orders.filter(row => owns(scope, row)).map(row => ({ ...row, createdDate: localDate(row.createdAt) }));
+  const monthOrders = dashboardOrders.filter(row => row.createdDate.startsWith(dashboardMonth));
+  const confirmedMonthOrders = monthOrders.filter(row => (row.arrivalStatus || '已到账') === '已到账');
+  const pendingMonthOrders = monthOrders.filter(row => (row.arrivalStatus || '已到账') !== '已到账');
+  const previousMonth = dashboardMonth === '2026-01' ? `${Number(dashboardMonth.slice(0, 4)) - 1}-12` : `${dashboardMonth.slice(0, 4)}-${String(Number(dashboardMonth.slice(5)) - 1).padStart(2, '0')}`;
+  const previousMonthTotal = amount(dashboardOrders.filter(row => row.createdDate.startsWith(previousMonth) && (row.arrivalStatus || '已到账') === '已到账'));
+  const referenceDate = dashboardMonth === '2026-11' ? '2026-11-10' : `${dashboardMonth}-28`;
+  const referenceDay = new Date(`${referenceDate}T00:00:00+08:00`).getDay() || 7;
+  const weekStart = shiftDate(referenceDate, 1 - referenceDay);
+  const weekEnd = shiftDate(weekStart, 6);
+  const confirmedOrders = dashboardOrders.filter(row => (row.arrivalStatus || '已到账') === '已到账');
+  const todayTotal = amount(confirmedOrders.filter(row => row.createdDate === referenceDate));
+  const weekTotal = amount(confirmedOrders.filter(row => row.createdDate >= weekStart && row.createdDate <= weekEnd));
+  const monthTotal = amount(confirmedMonthOrders);
+  const yearTotal = amount(confirmedOrders.filter(row => row.createdDate.startsWith(dashboardMonth.slice(0, 4))));
+  const monthRefunds = state.refunds.filter(row => owns(scope, row) && localDate(row.createdAt).startsWith(dashboardMonth));
+  const monthlyRefundTotal = amount(monthRefunds);
+  const target = 160000;
+  const targetRate = Math.round(monthTotal / Math.max(target, 1) * 1000) / 10;
+  const roster = state.role === 'sales' ? ['刘芸'] : ['刘芸', '莎莎', '双燕', '小迪'];
+  const salesRows = roster.map((name, index) => {
+    const rows = confirmedMonthOrders.filter(row => row.customerOwner === name);
+    const rowRefunds = monthRefunds.filter(refund => monthOrders.some(order => order.id === refund.orderId && order.customerOwner === name));
+    const rowTarget = index === 0 ? target : 0;
+    const performance = amount(rows);
+    return { name, performance, orders: rows.length, people: new Set(rows.map(row => row.customerId)).size, target: rowTarget, completion: rowTarget ? Math.round(performance / rowTarget * 1000) / 10 : null, refund: amount(rowRefunds) };
+  });
+  const weekTrend = Array.from({ length: 7 }, (_, index) => {
+    const date = shiftDate(referenceDate, index - 6);
+    return { date, label: date.slice(5).replace('-', '/'), amount: amount(confirmedOrders.filter(row => row.createdDate === date)) };
+  });
+  const exportPreview = { headers: PAYMENT_EXPORT_FIELDS, rows: paymentRows(orders, allCustomers) };
   return {
     role: state.role, scope, filters: state.filters, customers, allCustomers, orders, records, routes, accounts: state.accounts,
     conversations: state.conversations.filter(row => allCustomers.some(customer => customer.id === row.customerId)),
@@ -88,8 +136,15 @@ export const project = state => {
     tagOptions: [...new Set(allCustomers.flatMap(row => row.tags))], targets: { customers, groups }[state.targetKind] ?? [],
     followup: { status: 'ready', message: PENDING.followup, tasks: allCustomers.filter(row => row.nextVisit) },
     performance: { status: 'ready', total, refundTotal, net: total - refundTotal, conversion: customers.length ? Math.round(dealtIds.size / customers.length * 1000) / 10 : 0, projects: projectPerformance },
-    dashboard: { newCustomers: customers.length, consultations: consultedIds.size, deals: orders.length, total, refundTotal, net: total - refundTotal, conversion: customers.length ? Math.round(dealtIds.size / customers.length * 1000) / 10 : 0, funnel: [{ label: '新增客户', value: customers.length }, { label: '已咨询', value: consultedIds.size }, { label: '重点意向', value: customers.filter(row => ['重点意向', '已成交'].includes(row.stage)).length }, { label: '已成交', value: dealtIds.size }], trend, sourceSummary, salesPerformance },
+    dashboard: {
+      status: 'ready', month: dashboardMonth, referenceDate, monthTotal, previousMonthTotal, confirmedCount: confirmedMonthOrders.length,
+      target, targetRate, people: new Set(confirmedMonthOrders.map(row => row.customerId)).size,
+      pendingAmount: amount(pendingMonthOrders), pendingCount: pendingMonthOrders.length, refundTotal: monthlyRefundTotal, refundCount: monthRefunds.length,
+      periods: { today: todayTotal, week: weekTotal, month: monthTotal, year: yearTotal }, salesRows, weekTrend, message: PENDING.performance
+    },
+    exportPreview,
     projectPerformance, projectOptions: [...new Set(state.orders.filter(row => owns(scope, row)).map(row => row.project))], ownerOptions: [...new Set(allCustomers.map(row => row.ownerName))], sourceOptions: [...new Set(allCustomers.map(row => row.source))],
+    gradeOptions: [...new Set(allCustomers.map(row => row.grade))], schoolOptions: [...new Set(allCustomers.map(row => row.school))], provinceOptions: [...new Set(allCustomers.map(row => row.province))],
     dimensions: DIMENSIONS.map(item => ({ ...item, entries: summary(allCustomers, item.key), status: 'ready' })),
     exports: Object.entries(EXPORTS).filter(([, item]) => item.roles.includes(state.role)).map(([id, item]) => ({ id, ...item, status: exportStatus[item.policy](scope) }))
   };
@@ -202,16 +257,6 @@ export const reduce = (state, command) => {
 };
 
 export const buildExport = (projection, kind) => {
-  const contract = projection.exports.find(item => item.id === kind);
-  if (!contract || contract.status !== 'ready') return { status: 'blocked', message: PENDING.exports, headers: [], rows: [] };
-  const rows = {
-    customers: () => projection.customers.map(row => [row.id, row.name, row.wechat, row.phone, row.source, row.stage, row.account, row.ownerName, row.addedAt, row.tags.join('、'), row.groups.join('、')]),
-    consultation: () => projection.recordQueries.consultation.map(row => [row.customer, row.project, row.content, row.recordedByName, row.createdAt, row.nextVisit]),
-    followups: () => projection.recordQueries.revisit.map(row => [row.customer, row.project, row.content, row.recordedByName, row.createdAt, row.nextVisit]),
-    orders: () => projection.orders.map(row => [row.id, row.customer, row.project, row.product, row.amount, row.channel || '未填写', row.customerOwner, row.createdAt, row.proofName, row.contractStatus]),
-    refunds: () => projection.refunds.map(row => [row.id, row.orderId, row.customer, row.amount, row.reason, row.status, row.createdAt]),
-    tagsGroups: () => projection.customers.map(row => [row.name, row.account, row.ownerName, row.tags.join('、'), row.groups.join('、')]),
-    performance: () => projection.projectPerformance.map(row => [row.project, row.count, row.amount, row.refund, row.net])
-  }[kind];
-  return { status: 'ready', title: contract.title, headers: contract.headers, rows: rows?.() ?? [] };
+  if (kind !== 'payments') return { status: 'blocked', message: PENDING.exports, headers: [], rows: [] };
+  return { status: 'ready', title: `收款明细-${projection.dashboard?.month || '当前筛选'}`, headers: projection.exportPreview.headers, rows: projection.exportPreview.rows };
 };

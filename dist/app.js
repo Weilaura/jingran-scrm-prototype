@@ -73,13 +73,13 @@ const applyFilter = form => {
   renderShell();
 };
 const resetFilter = () => {
-  state = { ...state, filters: { query: '', start: '', end: '', recordKind: '', tag: '', account: '', project: '', owner: '', source: '' } };
+  state = { ...state, filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' } };
   renderShell();
 };
 const changeRole = element => {
   if (!ROLES[element.dataset.role]) return;
   closeModal();
-  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'dashboard', filters: { query: '', start: '', end: '', recordKind: '', tag: '', account: '', project: '', owner: '', source: '' }, result: { status: 'idle', message: '' } };
+  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'dashboard', filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' }, result: { status: 'idle', message: '' } };
   location.hash = '#/dashboard';
   renderShell();
 };

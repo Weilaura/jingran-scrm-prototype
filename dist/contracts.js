@@ -6,7 +6,7 @@ export const ROLES = {
 };
 
 export const ROUTES = [
-  { id: 'dashboard', title: '销售看板', icon: 'dashboard', description: '按项目查看成交总数、成交金额与待办事项' },
+  { id: 'dashboard', title: '销售看板', icon: 'dashboard', description: '按到账口径查看业绩、目标完成率、成交人数与销售明细' },
   { id: 'chat', title: '会话', icon: 'message', description: '客户与群聊统一工作台，支持快捷回复、置顶与业务录入' },
   { id: 'customers', title: '客户管理', icon: 'users', description: '搜索授权账号内联系人，按时间、账号和标签筛选' },
   { id: 'followups', title: '回访管理', icon: 'clock', description: '回访计划、提醒、执行记录与逾期任务', sub: true },
@@ -17,7 +17,7 @@ export const ROUTES = [
   { id: 'statistics', title: '项目统计', icon: 'dashboard', description: '项目成交数量、金额及销售排名' },
   { id: 'materials', title: '素材库', icon: 'image', description: '共享文件、图片与成交凭证素材' },
   { id: 'phrases', title: '快捷回复', icon: 'message', description: '创建、维护并在会话中使用个人话术' },
-  { id: 'export', title: '数据导出', icon: 'export', description: '导出当前授权范围的客户与成交数据' },
+  { id: 'export', title: '数据导出', icon: 'export', description: '按会议确认的收款明细表头筛选并导出销售数据' },
   { id: 'settings', title: '系统设置', icon: 'settings', description: '企微账号、标签同步、角色和数据范围' }
 ];
 
@@ -33,14 +33,14 @@ export const DIMENSIONS = [
   { key: 'school', label: '院校' }, { key: 'account', label: '所属企微号' }
 ];
 export const FOLLOWUP_RULES = ['今日应回访', '未来 7 天', '逾期未回访'];
+// meeting_02.mp4 17:05–18:45 shows one shared payment-detail schema.
+export const PAYMENT_EXPORT_FIELDS = [
+  '年级', '班型', '套餐', '子类', '微信昵称', '学员', '付款日期', '金额（元）', '收款类型',
+  '最早添加账号', '最早添加时间', '院校', '省份', '订单类型', '归属销售', '转介绍老师',
+  '地区 / 批次', '收款方式', '合同', '归属状态', '到账状态', '来源', '录入人'
+];
 export const EXPORTS = {
-  customers: { title: '客户基础资料', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户ID', '客户姓名', '微信号', '手机号', '客户来源', '客户阶段', '所属企微号', '归属销售', '添加时间', '标签', '所在群聊'] },
-  consultation: { title: '咨询记录', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '咨询项目', '咨询内容', '登记人', '登记时间', '下次回访'] },
-  followups: { title: '回访记录', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '回访项目', '回访内容', '回访人', '回访时间', '下次回访'] },
-  orders: { title: '成交明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['成交编号', '客户', '项目', '成交产品', '成交金额', '成交渠道', '客户归属', '登记时间', '成交截图', '合同状态'] },
-  refunds: { title: '退费申请', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['退费编号', '原成交单', '客户', '退费金额', '退费原因', '审批状态', '申请时间'] },
-  tagsGroups: { title: '标签与群聊明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '所属企微号', '归属销售', '客户标签', '所在群聊'] },
-  performance: { title: '销售业绩报表', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['项目', '成交数', '成交金额', '退费金额', '净成交金额'] }
+  payments: { title: '收款明细', description: '总表与销售个人表使用同一字段结构', roles: ['admin', 'supervisor', 'sales'], policy: 'records' }
 };
 
 export const PENDING = {
@@ -49,8 +49,8 @@ export const PENDING = {
   groups: '群聊与成员由已授权企微账号同步。', duplicate: '重复联系人按最早添加关系标记并进入交接流程。',
   followup: '回访计划可在会话右栏或回访管理中设置。', welcome: '欢迎语由企微规则执行。',
   records: '咨询项目和内容会沉淀到客户档案。', orders: '成交支持截图凭证；合同可在成交后补录。',
-  refunds: '退费申请须关联原成交并进入审批。', performance: '金额为演示口径。', dimensions: '人数按联系人去重。',
-  materials: '本地文件仅用于原型预览。', phrases: '快捷回复在会话输入区打开。', retention: '原企微标签在首次同步时保留。', exports: '导出使用当前筛选结果。'
+  refunds: '退费申请须关联原成交并进入审批。', performance: '业绩按已确认到账统计；退费单独统计，不直接冲减业绩。', dimensions: '人数按联系人去重。',
+  materials: '本地文件仅用于原型预览。', phrases: '快捷回复在会话输入区打开。', retention: '原企微标签在首次同步时保留。', exports: '收款明细按会议视频中的统一表头导出。'
 };
 
 export const TEXT = {
@@ -101,7 +101,7 @@ export const PLACEHOLDERS = {
 export const CUSTOMERS = [];
 
 export const PREVIEW_DATA = {
-  role: 'sales', actorId: 'self', teamScopeStatus: 'ready', teamOwners: ['self'],
+  role: 'admin', actorId: 'self', teamScopeStatus: 'ready', teamOwners: ['self'],
   accounts: [
     { id: 'acc-02', label: '企微 02号 · 刘芸', owner: 'self', role: '销售账号' },
     { id: 'acc-03', label: '企微 03号 · 莎莎', owner: 'self', role: '协作账号' },
@@ -122,9 +122,9 @@ export const PREVIEW_DATA = {
     { id: 'conv-yuan', customerId: 'customer-yuan', name: '袁嘉乐', short: '袁', color: '#d4a04f', type: 'direct', accountId: 'acc-03', time: '昨天', preview: '暂未回复', unread: 0 }
   ],
   orders: [
-    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', amount: 16800, channel: '企业微信收款', contractStatus: '待补录', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
-    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', amount: 8800, channel: '银行转账', contractStatus: '已上传', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
-    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', amount: 6980, channel: '企业微信收款', contractStatus: '待补录', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
+    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', classType: '联报班', package: '数学 + 英语联报', subcategory: '高考冲刺', amount: 16800, paymentType: '警然教育', orderType: '新签', referralTeacher: '王老师', regionBatch: '华东 / 26届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '已到账', enteredBy: '刘芸', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
+    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', classType: '高级班', package: '英语强化套餐', subcategory: '英语', amount: 8800, paymentType: '警然教育', orderType: '新签', referralTeacher: '—', regionBatch: '华东 / 26届', channel: '银行转账', contractStatus: '已上传', ownershipStatus: '已归属', arrivalStatus: '已到账', enteredBy: '刘芸', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
+    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', classType: '会员班', package: '英语能力提升', subcategory: '国际课程', amount: 6980, paymentType: '警然教育', orderType: '续费', referralTeacher: '陈老师', regionBatch: '华东 / 27届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '待确认', enteredBy: '刘芸', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
   ],
   refunds: [
     { id: 'RF20261109003', owner: 'self', orderId: 'CJ202611070044', customer: '陈一诺家长', amount: 1000, reason: '课程调整', status: '审批中', createdAt: '2026-11-09T05:30:00Z' }

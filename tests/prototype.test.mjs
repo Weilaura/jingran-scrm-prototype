@@ -31,31 +31,36 @@ test('dashboard aggregates project deal count and amount', () => {
   assert.equal(view.performance.total, 32580);
   const gaokao = view.projectPerformance.find(row => row.project === '2027届高考项目');
   assert.deepEqual({ count: gaokao.count, amount: gaokao.amount }, { count: 2, amount: 25600 });
-  const exported = buildExport(project({ ...fresh(), role: 'admin' }), 'performance');
-  assert.equal(exported.status, 'ready');
-  assert.ok(exported.rows.some(row => row[0] === '2027届高考项目'));
 });
 
-test('sales dashboard keeps common migration dimensions and operating metrics', () => {
-  const data = project(fresh());
-  assert.deepEqual({ customers: data.dashboard.newCustomers, consultations: data.dashboard.consultations, deals: data.dashboard.deals, total: data.dashboard.total, refunds: data.dashboard.refundTotal, net: data.dashboard.net }, { customers: 5, consultations: 3, deals: 3, total: 32580, refunds: 1000, net: 31580 });
+test('sales dashboard follows the meeting video metrics, scope and settlement rules', () => {
+  const data = project({ ...fresh(), role: 'sales' });
+  assert.equal(data.dashboard.status, 'ready');
+  assert.equal(data.dashboard.monthTotal, 25600);
+  assert.equal(data.dashboard.pendingAmount, 6980);
+  assert.equal(data.dashboard.refundTotal, 1000);
+  assert.deepEqual(data.dashboard.periods, { today: 0, week: 16800, month: 25600, year: 25600 });
+  assert.deepEqual(data.dashboard.salesRows.map(row => row.name), ['刘芸']);
   const html = renderShell('dashboard', { ...data, ui });
-  ['统计开始日期', '成交项目', '企微账号', '归属销售', '客户来源', '新增客户数', '咨询客户数', '成交金额', '退费金额', '净成交金额', '客户转化漏斗', '成交趋势', '客户来源分布', '项目业绩', '销售业绩'].forEach(label => assert.ok(html.includes(label), label));
+  ['本月业绩', '个人目标完成率', '成交人数', '待确认 / 当月退费', '当天业绩', '本周业绩', '本年业绩', '按销售', '本周业绩曲线'].forEach(label => assert.ok(html.includes(label), label));
+  ['客户转化漏斗', '来源分布', '新增客户数'].forEach(label => assert.equal(html.includes(label), false, label));
+  const admin = project(fresh());
+  assert.deepEqual(admin.dashboard.salesRows.map(row => row.name), ['刘芸', '莎莎', '双燕', '小迪']);
+  assert.ok(renderShell('dashboard', { ...admin, ui }).includes('设置月度目标'));
 });
 
-test('data export provides all common business datasets and stable field headers', () => {
+test('data export uses the single 23-column payment-detail schema shown in meeting video', () => {
   const data = project(fresh());
-  const expected = ['customers', 'consultation', 'followups', 'orders', 'refunds', 'tagsGroups', 'performance'];
-  assert.deepEqual(data.exports.map(row => row.id), expected);
-  for (const kind of expected) {
-    const exported = buildExport(data, kind);
-    assert.equal(exported.status, 'ready', kind);
-    assert.ok(exported.headers.length >= 5, kind);
-  }
+  assert.deepEqual(data.exports.map(row => row.id), ['payments']);
+  const exported = buildExport(data, 'payments');
+  assert.equal(exported.status, 'ready');
+  assert.equal(exported.headers.length, 23);
+  assert.deepEqual(exported.headers.slice(0, 8), ['年级', '班型', '套餐', '子类', '微信昵称', '学员', '付款日期', '金额（元）']);
+  assert.deepEqual(exported.headers.slice(-6), ['收款方式', '合同', '归属状态', '到账状态', '来源', '录入人']);
+  assert.equal(exported.rows.length, 3);
   const html = renderShell('export', { ...data, ui });
-  ['数据库迁移字段', '客户基础资料', '咨询记录', '回访记录', '成交明细', '退费申请', '标签与群聊明细', '销售业绩报表', '选择字段', '最近导出记录'].forEach(label => assert.ok(html.includes(label), label));
-  const modal = renderModal('exportFields', { ...data, ui }, 'customers');
-  ['客户ID', '微信号', '客户来源', '迁移必选', 'CSV（兼容 Excel）', '按所选字段导出'].forEach(label => assert.ok(modal.includes(label), label));
+  ['收款明细总表', '统一表结构', '付款开始日期', '付款结束日期', '年级', '班型', '套餐', '归属销售', '到账状态', '导出当前结果'].forEach(label => assert.ok(html.includes(label), label));
+  ['客户基础资料', '销售业绩报表', '选择字段'].forEach(label => assert.equal(html.includes(label), false, label));
 });
 
 test('deal entry retains project, screenshot and post-deal contract status', () => {
@@ -132,7 +137,7 @@ test('all requested click flows have concrete modal content', () => {
     sessionCapacity: '2,000 个活跃会话', quickReply: '使用此回复', mentionAll: '确认使用管理员账号 @所有人',
     followup: '下次回访日期', handover: '原销售收到通知', order: '成交记录截图', refund: '提交退费申请',
     contract: '支持后置上传', proof: '成交记录截图', broadcast: '正式发送前需员工', tagDetail: '标签人数明细',
-    tagManage: '原企微标签不会被删除', groupAccount: '管理员账号', tagSync: '保留并去重', projectDetail: '归属销售'
+    tagManage: '原企微标签不会被删除', groupAccount: '管理员账号', tagSync: '保留并去重', projectDetail: '归属销售', targetSetting: '月度目标（元）'
   };
   const ids = { followup: 'customer-zhou', handover: 'customer-zhou', order: 'customer-zhou', refund: 'CJ202611090018', contract: 'CJ202611090018', proof: 'CJ202611090018', tagDetail: '已成交', tagManage: 'customer-zhou', projectDetail: '2027届高考项目' };
   for (const [type, expected] of Object.entries(cases)) {
