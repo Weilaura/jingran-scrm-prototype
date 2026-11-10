@@ -21,6 +21,9 @@ test('customer search covers all authorized work accounts and filters by account
   const all = project(base);
   assert.equal(all.allCustomers.length, PREVIEW_DATA.customers.length);
   assert.equal(new Set(all.allCustomers.map(row => row.accountId)).size, 2);
+  const html = renderShell('customers', { ...all, ui });
+  assert.ok(html.includes('>查看</button>'));
+  assert.equal(/<button[^>]*>筛选<\/button>/.test(html), false);
   const filtered = project({ ...base, filters: { ...base.filters, account: 'acc-03', tag: '重点跟进', start: '2026-11-01', end: '2026-11-10' } });
   assert.deepEqual(filtered.customers.map(row => row.name), ['陈一诺家长']);
 });

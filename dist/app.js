@@ -1,6 +1,6 @@
 import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js?v=20261110-export-hub';
 import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js?v=20261110-export-hub';
-import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-export-hub';
+import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-view-buttons';
 
 let state = createState(structuredClone(PREVIEW_DATA));
 let projection = project(state);
