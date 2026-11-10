@@ -1,6 +1,6 @@
 import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js';
 import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js';
-import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js';
+import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-chat-tabs';
 
 let state = createState(structuredClone(PREVIEW_DATA));
 let projection = project(state);
