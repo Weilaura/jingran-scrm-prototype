@@ -1,156 +1,154 @@
-// Static prototype contracts. No enterprise authorization or provider state is asserted here.
+// Static high-fidelity prototype contracts. All records are fictional demo data.
 export const ROLES = {
-  admin: { label: '管理员', scope: 'pending', scopeLabel: '管理权限待确认', routes: ['customers', 'messages', 'groups', 'followups', 'welcome', 'records', 'transactions', 'statistics', 'materials', 'phrases', 'export', 'settings'] },
-  supervisor: { label: '主管', scope: 'team', scopeLabel: '授权团队', routes: ['customers', 'records', 'transactions', 'statistics', 'export'] },
-  sales: { label: '销售', scope: 'self', scopeLabel: '本人授权数据', routes: ['customers', 'messages', 'groups', 'followups', 'welcome', 'records', 'transactions', 'materials', 'phrases', 'export'] }
+  admin: { label: '管理员', scope: 'all', scopeLabel: '全部企微账号', routes: ['dashboard', 'chat', 'customers', 'followups', 'records', 'transactions', 'messages', 'groups', 'statistics', 'materials', 'phrases', 'export', 'settings'] },
+  supervisor: { label: '主管', scope: 'self', scopeLabel: '授权团队', routes: ['dashboard', 'chat', 'customers', 'followups', 'records', 'transactions', 'messages', 'groups', 'statistics', 'export'] },
+  sales: { label: '销售', scope: 'self', scopeLabel: '本人授权账号', routes: ['dashboard', 'chat', 'customers', 'followups', 'records', 'transactions', 'messages', 'groups', 'materials', 'phrases', 'export'] }
 };
 
 export const ROUTES = [
-  { id: 'customers', title: '客户管理', icon: 'users', description: '客户资料、归属、标签、批次及群分类' },
-  { id: 'messages', title: '发送任务', icon: 'message', description: '选择客户或群，准备内容并核对发送结果' },
-  { id: 'groups', title: '群管理', icon: 'users', description: '按年级核对客户群分类与批量改名结果' },
-  { id: 'followups', title: '自动回访', icon: 'clock', description: '隔日、7天、14天筛选未打标签新客并生成回访任务' },
-  { id: 'welcome', title: '新客欢迎语', icon: 'message', description: '带昵称的新客欢迎语与发送记录' },
-  { id: 'records', title: '咨询与回访', icon: 'file', description: '登记咨询、回访和下次回访时间，按时间查询' },
-  { id: 'transactions', title: '成交与退费', icon: 'deal', description: '登记产品、金额及客户归属，退费关联原订单' },
-  { id: 'statistics', title: '查询与统计', icon: 'dashboard', description: '授权团队查询、客户分布及业绩报表' },
-  { id: 'materials', title: '素材库', icon: 'image', description: '系统内共享文件、图片及约定发送使用' },
-  { id: 'phrases', title: '个人话术', icon: 'message', description: '创建、管理和使用本人话术' },
-  { id: 'export', title: '数据导出', icon: 'export', description: '按授权范围导出约定明细与报表' },
-  { id: 'settings', title: '系统设置', icon: 'settings', description: '核对账号、角色与待确认的权限范围' }
+  { id: 'dashboard', title: '销售看板', icon: 'dashboard', description: '按项目查看成交总数、成交金额与待办事项' },
+  { id: 'chat', title: '会话', icon: 'message', description: '客户与群聊统一工作台，支持快捷回复、置顶与业务录入' },
+  { id: 'customers', title: '客户管理', icon: 'users', description: '搜索授权账号内联系人，按时间、账号和标签筛选' },
+  { id: 'followups', title: '回访管理', icon: 'clock', description: '回访计划、提醒、执行记录与逾期任务', sub: true },
+  { id: 'records', title: '咨询记录', icon: 'file', description: '登记咨询项目、咨询内容和后续回访', sub: true },
+  { id: 'transactions', title: '成交管理', icon: 'deal', description: '录入成交、成交截图、退费申请及合同后补' },
+  { id: 'messages', title: '群发管理', icon: 'message', description: '按标签、账号或群聊创建群发任务并查看结果' },
+  { id: 'groups', title: '群聊管理', icon: 'users', description: '客户群、回复账号与管理员通知' },
+  { id: 'statistics', title: '项目统计', icon: 'dashboard', description: '项目成交数量、金额及销售排名' },
+  { id: 'materials', title: '素材库', icon: 'image', description: '共享文件、图片与成交凭证素材' },
+  { id: 'phrases', title: '快捷回复', icon: 'message', description: '创建、维护并在会话中使用个人话术' },
+  { id: 'export', title: '数据导出', icon: 'export', description: '导出当前授权范围的客户与成交数据' },
+  { id: 'settings', title: '系统设置', icon: 'settings', description: '企微账号、标签同步、角色和数据范围' }
 ];
 
 export const RECORD_KINDS = { consultation: '咨询记录', revisit: '回访记录' };
-export const CONTENT_KINDS = { text: '文本', image: '图片', file: '文件', link: '公众号普通链接' };
+export const CONTENT_KINDS = { text: '文本', image: '图片', file: '文件', link: '公众号链接' };
 export const TARGET_KINDS = { customers: '客户', groups: '客户群' };
 export const TARGET_COLLECTIONS = { customers: 'customers', groups: 'groups' };
 export const CONTENT_INPUTS = { text: 'text', link: 'link', image: 'attachment', file: 'attachment' };
 export const SELECTION_ACTIONS = { true: 'add', false: 'delete' };
-export const FILTER_CONTEXTS = { customers: 'customers', messages: 'messages', records: 'records', transactions: 'transactions', export: 'transactions', statistics: 'statistics' };
+export const FILTER_CONTEXTS = { customers: 'customers', records: 'records', transactions: 'transactions', export: 'transactions', statistics: 'statistics', messages: 'messages' };
 export const DIMENSIONS = [
   { key: 'grade', label: '年级' }, { key: 'province', label: '生源地' },
   { key: 'school', label: '院校' }, { key: 'account', label: '所属企微号' }
 ];
-export const FOLLOWUP_RULES = ['隔日', '7天', '14天'];
+export const FOLLOWUP_RULES = ['今日应回访', '未来 7 天', '逾期未回访'];
 export const EXPORTS = {
-  orders: { title: '本人成交明细', roles: ['sales'], policy: 'records', headers: ['客户', '产品', '金额', '客户归属', '登记时间'] },
-  performance: { title: '业绩报表', roles: ['supervisor', 'admin'], policy: 'pending', headers: [] }
+  orders: { title: '成交明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '项目', '金额', '客户归属', '登记时间'] },
+  performance: { title: '项目业绩报表', roles: ['supervisor', 'admin'], policy: 'records', headers: ['项目', '成交数', '成交金额'] }
 };
+
 export const PENDING = {
-  scope: '主管仅查询授权团队；团队范围尚待确认。管理员具体管理权限尚待确认。',
-  customer: '归属调整方式、批次规格、同步频率、标签写回范围及资料来源待确认。',
-  sending: '单批量、日发送峰值、平台额度、发送权限、限额和允许链接待确认。',
-  provider: '企微接入尚未验证。',
-  groups: '群改名权限、接口能力、目标群及命名规则待接入验证和确认。',
-  duplicate: '跨活码客户识别与分配条件待验证；核对重复客户是否仍指向最早添加员工。',
-  followup: '起算点、退出规则待确认，当前不自动生成回访任务。',
-  welcome: '模板数量、原欢迎语配置冲突及事件凭据有效条件待确认。',
-  records: '咨询及回访的其他字段待确认。',
-  orders: '订单其他字段、产品数量、修改权限、退费规则及统计口径待确认。',
-  refunds: '退费权限、可退金额及登记规则待确认。',
-  performance: '业绩及退费统计口径、去重规则和报表模板待确认。',
-  dimensions: '维度字段取值、去重口径和占比分母待确认。',
-  materials: '公共素材管理权限、格式、单文件大小及总容量待确认。公共素材仅指系统内共享。',
-  phrases: '正式使用入口及话术条数待确认。',
-  retention: '数据、私有文件、导出、备份和日志的保留期限待书面确认。',
-  exports: '文件格式、导出字段、报表模板和单批导出量待确认。'
+  scope: '数据范围以已授权企微账号和角色权限为准。', customer: '搜索覆盖当前账号有权查看的全部企微联系人。',
+  sending: '群发任务提交前需要员工再次确认，正式额度以企微接口为准。', provider: '当前为静态交互演示，未连接真实企业微信。',
+  groups: '群聊与成员由已授权企微账号同步。', duplicate: '重复联系人按最早添加关系标记并进入交接流程。',
+  followup: '回访计划可在会话右栏或回访管理中设置。', welcome: '欢迎语由企微规则执行。',
+  records: '咨询项目和内容会沉淀到客户档案。', orders: '成交支持截图凭证；合同可在成交后补录。',
+  refunds: '退费申请须关联原成交并进入审批。', performance: '金额为演示口径。', dimensions: '人数按联系人去重。',
+  materials: '本地文件仅用于原型预览。', phrases: '快捷回复在会话输入区打开。', retention: '原企微标签在首次同步时保留。', exports: '导出使用当前筛选结果。'
 };
 
 export const TEXT = {
-  brand: '警然 SCRM', preview: '本地原型预览', previewNote: '全部为演示假数据，未连接企微；刷新恢复初始演示数据。',
-  pending: '待确认', empty: '暂无记录', all: '全部', search: '查询', reset: '重置', cancel: '取消', save: '保存',
-  addOrder: '登记成交', addRefund: '登记退费', addRecord: '添加记录', addPhrase: '新增话术', edit: '编辑', remove: '删除',
-  customer: '客户', customerId: '客户标识', owner: '客户归属', product: '产品', amount: '金额', date: '登记时间',
-  customerSearch: '昵称、备注名或客户标识', customerName: '昵称 / 备注名', tags: '客户标签', batch: '批次', groupClass: '群分类',
-  sync: '资料同步', syncTypes: ['初次同步', '变化同步', '异常补查'], noSync: '尚无同步结果', duplicate: '防重复加粉',
-  account: '所属企微号', firstRelation: '最早添加关系', firstRelationPending: '原始添加关系及时间待同步核对',
-  sourcePending: '资料来源待字段映射确认', editTags: '编辑标签', newTag: '新建标签', tagSearch: '搜索标签',
-  tagPending: '本地标签预览；企微写回权限与范围待确认。', selected: '已选择', add: '添加', tagEmpty: '暂无标签',
+  brand: '警然 SCRM', preview: '高保真交互原型', previewNote: '演示数据 · 未连接真实企微 · 所有按钮均可体验，刷新后恢复初始数据',
+  pending: '说明', empty: '暂无记录', all: '全部', search: '查询', reset: '重置', cancel: '取消', save: '保存',
+  addOrder: '录入成交', addRefund: '申请退费', addRecord: '新增咨询记录', addPhrase: '新增话术', edit: '编辑', remove: '删除',
+  customer: '客户', customerId: '客户标识', owner: '归属销售', product: '成交产品', amount: '成交金额', date: '登记时间',
+  customerSearch: '昵称、备注名、手机号或微信号', customerName: '客户姓名', tags: '客户标签', batch: '批次', groupClass: '群分类',
+  sync: '资料同步', syncTypes: ['首次全量同步', '每日增量同步', '异常补查'], noSync: '同步正常', duplicate: '重复添加与交接',
+  account: '企微账号', firstRelation: '最早添加关系', firstRelationPending: '系统按最早添加时间识别原销售',
+  sourcePending: '资料来自已授权企业微信账号', editTags: '编辑标签', newTag: '新建标签', tagSearch: '搜索标签',
+  tagPending: '上线首次同步会读取并保留企微已有标签。', selected: '已选择', add: '添加', tagEmpty: '暂无标签',
   content: '内容', recordKind: '记录类型', nextVisit: '下次回访时间', recordedBy: '登记员工', start: '开始日期', end: '结束日期',
-  targets: '发送对象', targetKind: '对象类型', contentKind: '内容类型', crossTags: '跨标签全选', selectAll: '全选当前结果',
-  submitTask: '提交至企微', stopPending: '停止待发', taskResults: '任务与结果', taskStatus: '状态',
-  delivery: '接口受理不等于送达；停止待发不等于撤回已发送消息。', taskEmpty: '尚无发送任务',
+  targets: '发送对象', targetKind: '对象类型', contentKind: '内容类型', crossTags: '支持跨标签选择', selectAll: '全选当前结果',
+  submitTask: '创建群发任务', stopPending: '停止待发', taskResults: '群发任务记录', taskStatus: '状态',
+  delivery: '发送前需员工确认，实际送达结果以企微回执为准。', taskEmpty: '暂无群发任务',
   groupName: '客户群', newGroupName: '修改后群名', renameGroup: '批量改名', groupResults: '改名结果',
-  generateFollowup: '生成回访任务', followupTargets: '未打标签新客', followupTasks: '回访任务',
-  welcomeTemplate: '带昵称的新客欢迎语', welcomeResults: '欢迎语发送记录',
-  noEvent: '尚无新客事件', welcomeFailure: '无有效事件凭据、超时或发送失败均须保留结果。',
-  orderList: '成交记录', refundList: '退费记录', originalOrder: '原订单', refundAmount: '退费金额',
-  noOrder: '请先登记成交', refundAssociation: '退费须关联原订单并按确认口径纳入统计。',
-  queries: ['成交查询', '业绩流水', '咨询填写', '回访填写'], distributions: '客户人数与占比', performance: '业绩效能',
-  totalPerformance: '总业绩', productPerformance: '分产品业绩', peoplePerformance: '年级、院校、生源地人数',
+  generateFollowup: '设置回访', followupTargets: '需要回访的客户', followupTasks: '回访任务',
+  welcomeTemplate: '新客欢迎语', welcomeResults: '欢迎语记录', noEvent: '暂无新客事件', welcomeFailure: '失败会保留原因。',
+  orderList: '成交记录', refundList: '退费申请', originalOrder: '原成交单', refundAmount: '退费金额',
+  noOrder: '暂无成交记录', refundAssociation: '退费申请自动关联原成交单和归属销售。',
+  queries: ['成交查询', '项目业绩', '咨询记录', '回访记录'], distributions: '客户分布', performance: '项目成交效能',
+  totalPerformance: '总成交金额', productPerformance: '项目成交数', peoplePerformance: '成交客户数',
   count: '人数', percent: '占比', dimension: '维度', value: '取值',
-  file: '文件', image: '图片', materialType: '素材类型', filename: '文件名称', fileSize: '大小', chooseFile: '选择本地素材',
-  shared: '系统内共享', materialNotice: '当前仅预览本地文件；不上传、不公开文件链接。', useMaterial: '用于发送任务',
-  phraseTitle: '话术名称', copy: '复制使用', personal: '仅本人管理和使用',
-  exportOrders: '导出本人成交明细', exportPerformance: '导出业绩报表', exportEmpty: '当前筛选范围内没有成交记录',
-  exportNotice: '本地演示导出使用当前筛选结果，不代表正式格式已确认。',
+  file: '文件', image: '图片', materialType: '素材类型', filename: '文件名称', fileSize: '大小', chooseFile: '选择本地文件',
+  shared: '共享素材', materialNotice: '文件仅在当前浏览器预览，不会真实上传。', useMaterial: '用于群发',
+  phraseTitle: '话术名称', copy: '用于回复', personal: '个人快捷回复',
+  exportOrders: '导出成交明细', exportPerformance: '导出项目业绩', exportEmpty: '当前筛选范围没有记录', exportNotice: '导出使用当前筛选结果。',
   permissions: '角色与数据范围', capability: '操作', scope: '数据范围', authorization: '权限状态',
-  salesScope: '本人授权客户、记录、成交导出及个人话术', supervisorScope: '仅查询授权团队业务数据', adminScope: '账号、角色与系统配置；具体管理权限待确认',
-  permissionPending: '归属调整、标签写回、退费、公共素材管理及发送权限待确认',
-  boundaries: '接入与安全边界', guards: ['发送须员工确认，匿名及越权发送应被拦截', '发送限额、允许链接、重复提交保护及日志', '无效回调不驱动业务，重复事件不重复执行', '私有文件按当前登录、角色及数据权限访问', '协助配置企微可用群防骚扰规则；外部群消息不能仅靠本系统完全阻止'],
-  localSaved: '已保存本地演示',
-  invalid: '请检查必填内容、金额及关联对象', denied: '对象不在当前授权范围内', unavailable: '操作条件尚未确认',
-  noAccess: '当前范围尚待确认，不展示业务数据', pendingTeam: '授权团队范围待确认', pendingAdmin: '管理员具体数据权限待确认',
-  noCustomers: '当前范围内暂无客户', noGroups: '尚无授权客户群', noMaterials: '尚无素材', noPhrases: '尚无个人话术',
-  customerCount: '授权客户', orderCount: '成交记录', recordCount: '咨询与回访',
-  contractWork: '本期业务', statusPending: '尚未执行', inScope: '授权范围', consultation: '咨询', revisit: '回访',
-  amountPending: '统计口径待确认', matching: '当前查询结果', emptyValues: '字段值待确认', localOnly: '仅本地演示',
-  roleLabel: '切换演示角色', role: '角色', noTargets: '请选择授权范围内的客户', groupSource: '客户群及群分类待授权同步',
-  close: '关闭', selectCustomer: '选择客户', orderId: '成交编号', refundDate: '退费登记时间', tagKeep: '同名标签不重复添加', currentActor: '当前账号'
+  salesScope: '本人被授权的企微账号', supervisorScope: '授权团队及成员', adminScope: '全部企微账号和系统配置',
+  permissionPending: '按角色授权', boundaries: '接入说明', guards: ['发送前二次确认', '会话容量可配置', '企微原标签首次同步保留', '交接全程留痕'],
+  localSaved: '已保存本地演示数据', invalid: '请检查必填内容、金额及关联对象', denied: '对象不在当前授权范围内', unavailable: '当前操作仅做界面演示',
+  noAccess: '当前角色无权限', pendingTeam: '授权团队', pendingAdmin: '全部账号', noCustomers: '没有匹配客户', noGroups: '暂无客户群',
+  noMaterials: '暂无素材', noPhrases: '暂无快捷回复', customerCount: '客户数', orderCount: '成交数', recordCount: '咨询与回访',
+  contractWork: '业务中心', statusPending: '待处理', inScope: '授权范围', consultation: '咨询', revisit: '回访',
+  amountPending: '金额待确认', matching: '当前结果', emptyValues: '暂无', localOnly: '静态原型演示', roleLabel: '切换角色', role: '角色',
+  noTargets: '请选择对象', groupSource: '群聊来自已授权企微账号', close: '关闭', selectCustomer: '选择客户', orderId: '成交编号',
+  refundDate: '申请时间', tagKeep: '同名标签不重复', currentActor: '当前销售'
 };
 
 export const PLACEHOLDERS = {
-  query: '输入关键词，例如：演示客户甲',
-  product: '例如：演示产品甲',
-  amount: '例如：1200',
-  refundAmount: '输入退费金额，例如：200',
-  name: '输入拟修改的群名',
-  title: '例如：咨询问候',
-  content: '填写本次咨询或回访内容，例如：客户咨询了产品信息。',
-  message: '输入要发送的文字，例如：您好，请问您方便什么时候沟通？',
-  link: '粘贴微信公众号文章链接',
-  attachment: '可填写随图片或文件发送的文字',
-  welcome: '输入新客欢迎语内容',
-  phrase: '例如：您好，请问您想咨询哪些产品信息？'
+  query: '搜索昵称、备注名、手机号或微信号', product: '例如：高三数学冲刺班', project: '例如：2027届高考项目', amount: '例如：16800',
+  refundAmount: '输入申请退费金额', name: '输入群名', title: '例如：课程咨询',
+  content: '填写咨询内容或回访结果', message: '输入消息，Enter 发送', link: '粘贴公众号文章链接', attachment: '补充说明',
+  welcome: '输入欢迎语', phrase: '输入常用回复内容'
 };
 
 export const CUSTOMERS = [];
 
-// Fictional display fixtures, supplied only by the local preview entry point.
 export const PREVIEW_DATA = {
-  role: 'sales',
+  role: 'sales', actorId: 'self', teamScopeStatus: 'ready', teamOwners: ['self'],
+  accounts: [
+    { id: 'acc-02', label: '企微 02号 · 刘芸', owner: 'self', role: '销售账号' },
+    { id: 'acc-03', label: '企微 03号 · 莎莎', owner: 'self', role: '协作账号' },
+    { id: 'acc-admin', label: '管理员账号', owner: 'self', role: '管理员' }
+  ],
   customers: [
-    { id: 'demo-customer-a', name: '演示客户甲', owner: 'self', ownerName: '演示销售甲', grade: '高三', province: '江苏省', school: '演示学校甲', account: '演示企微号', tags: ['演示咨询客户'], nextVisit: '2026-11-10' },
-    { id: 'demo-customer-b', name: '演示客户乙', owner: 'self', ownerName: '演示销售甲', grade: '高二', province: '浙江省', school: '演示学校乙', account: '演示企微号', tags: ['演示回访客户'], nextVisit: '2026-11-11' },
-    { id: 'demo-customer-c', name: '演示客户丙', owner: 'self', ownerName: '演示销售甲', grade: '高三', province: '安徽省', school: '演示学校丙', account: '演示企微号', tags: ['演示咨询客户', '演示回访客户'], nextVisit: '2026-11-12' },
-    { id: 'demo-customer-d', name: '演示客户丁', owner: 'self', ownerName: '演示销售甲', grade: '高一', province: '江苏省', school: '演示学校丁', account: '演示企微号', tags: [] },
-    { id: 'demo-customer-e', name: '演示客户戊', owner: 'self', ownerName: '演示销售甲', grade: '高二', province: '浙江省', school: '演示学校戊', account: '演示企微号', tags: [] }
+    { id: 'customer-zhou', name: '周念', wechat: 'nian_2027', phone: '138****7621', owner: 'self', ownerName: '刘芸', grade: '高三', province: '江苏省', school: '南京外国语学校', account: '企微 02号', accountId: 'acc-02', tags: ['26届联报', '数学冲刺', '已成交', '重要客户'], nextVisit: '2026-11-12', addedAt: '2026-11-02T03:20:00Z', groups: ['26届数学联报群', '高三冲刺A班'] },
+    { id: 'customer-chen', name: '陈一诺家长', wechat: 'chenmom88', phone: '139****3368', owner: 'self', ownerName: '刘芸', grade: '高二', province: '浙江省', school: '杭州学军中学', account: '企微 03号', accountId: 'acc-03', tags: ['意向A', '家长', '重点跟进'], nextVisit: '2026-11-11', addedAt: '2026-11-05T06:30:00Z', groups: ['高二家长咨询群'] },
+    { id: 'customer-lin', name: '林夏', wechat: 'linxia07', phone: '137****9021', owner: 'self', ownerName: '刘芸', grade: '高三', province: '上海市', school: '上海中学', account: '企微 02号', accountId: 'acc-02', tags: ['数学强化', '已成交'], nextVisit: '2026-11-15', addedAt: '2026-10-28T02:00:00Z', groups: ['高三冲刺A班'] },
+    { id: 'customer-yuan', name: '袁嘉乐', wechat: 'yuanjl', phone: '136****2180', owner: 'self', ownerName: '刘芸', grade: '高二', province: '湖北省', school: '武汉二中', account: '企微 03号', accountId: 'acc-03', tags: ['未回复', '待跟进'], nextVisit: '2026-11-10', addedAt: '2026-11-08T01:10:00Z', groups: [] },
+    { id: 'customer-wu', name: '吴颖', wechat: 'wuying_9', phone: '135****1042', owner: 'self', ownerName: '刘芸', grade: '高一', province: '安徽省', school: '合肥一中', account: '企微 02号', accountId: 'acc-02', tags: ['新客户'], nextVisit: '2026-11-13', addedAt: '2026-11-09T04:40:00Z', groups: ['新客咨询群'] }
+  ],
+  conversations: [
+    { id: 'conv-zhou', customerId: 'customer-zhou', name: '周念', short: '周', color: '#e88a72', type: 'direct', accountId: 'acc-02', time: '10:24', preview: '好的老师，我晚点把合同发您', unread: 2, important: true },
+    { id: 'conv-group', customerId: 'customer-zhou', name: '26届联报咨询群', short: '群', color: '#4d9b8a', type: 'group', accountId: 'acc-02', time: '10:16', preview: '周念：想了解一下联报课程', unread: 8, members: 128 },
+    { id: 'conv-chen', customerId: 'customer-chen', name: '陈一诺家长', short: '陈', color: '#5f83c6', type: 'direct', accountId: 'acc-03', time: '09:48', preview: '请问尾款最晚什么时候交？', unread: 1 },
+    { id: 'conv-lin', customerId: 'customer-lin', name: '林夏', short: '林', color: '#ad70b1', type: 'direct', accountId: 'acc-02', time: '昨天', preview: '[图片] 这是我的成绩单', unread: 0 },
+    { id: 'conv-yuan', customerId: 'customer-yuan', name: '袁嘉乐', short: '袁', color: '#d4a04f', type: 'direct', accountId: 'acc-03', time: '昨天', preview: '暂未回复', unread: 0 }
   ],
   orders: [
-    { id: 'demo-order-a', owner: 'self', customerId: 'demo-customer-a', customer: '演示客户甲', customerOwner: '演示销售甲', product: '演示产品甲', amount: 1200, createdAt: '2026-11-06T02:00:00Z' },
-    { id: 'demo-order-b', owner: 'self', customerId: 'demo-customer-b', customer: '演示客户乙', customerOwner: '演示销售甲', product: '演示产品乙', amount: 800, createdAt: '2026-11-08T06:30:00Z' },
-    { id: 'demo-order-c', owner: 'self', customerId: 'demo-customer-c', customer: '演示客户丙', customerOwner: '演示销售甲', product: '演示产品甲', amount: 600, createdAt: '2026-11-09T01:30:00Z' }
+    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', amount: 16800, contractStatus: '待补录', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
+    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', amount: 8800, contractStatus: '已上传', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
+    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', amount: 6980, contractStatus: '待补录', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
+  ],
+  refunds: [
+    { id: 'RF20261109003', owner: 'self', orderId: 'CJ202611070044', customer: '陈一诺家长', amount: 1000, reason: '课程调整', status: '审批中', createdAt: '2026-11-09T05:30:00Z' }
   ],
   records: [
-    { id: 'demo-record-a', owner: 'self', customerId: 'demo-customer-a', customer: '演示客户甲', kind: 'consultation', content: '演示记录：咨询产品信息。', recordedBy: 'self', recordedByName: '演示销售甲', createdAt: '2026-11-05T02:00:00Z', nextVisit: '2026-11-10' },
-    { id: 'demo-record-b', owner: 'self', customerId: 'demo-customer-a', customer: '演示客户甲', kind: 'revisit', content: '演示记录：确认下次回访时间。', recordedBy: 'self', recordedByName: '演示销售甲', createdAt: '2026-11-09T02:00:00Z', nextVisit: '2026-11-10' },
-    { id: 'demo-record-c', owner: 'self', customerId: 'demo-customer-b', customer: '演示客户乙', kind: 'consultation', content: '演示记录：记录客户咨询内容。', recordedBy: 'self', recordedByName: '演示销售甲', createdAt: '2026-11-07T06:30:00Z', nextVisit: '2026-11-11' },
-    { id: 'demo-record-d', owner: 'self', customerId: 'demo-customer-c', customer: '演示客户丙', kind: 'revisit', content: '演示记录：记录本次回访内容。', recordedBy: 'self', recordedByName: '演示销售甲', createdAt: '2026-11-09T01:00:00Z', nextVisit: '2026-11-12' }
+    { id: 'record-a', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'consultation', project: '高三数学冲刺', content: '咨询压轴题提分和联报课程安排。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T02:00:00Z', nextVisit: '2026-11-12' },
+    { id: 'record-b', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'revisit', project: '合同跟进', content: '已发送课程方案，等待确认合同。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T03:00:00Z', nextVisit: '2026-11-12' },
+    { id: 'record-c', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', kind: 'consultation', project: '国际课程项目', content: '咨询英语能力提升与付款节点。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-07T06:30:00Z', nextVisit: '2026-11-11' },
+    { id: 'record-d', owner: 'self', customerId: 'customer-lin', customer: '林夏', kind: 'revisit', project: '高三英语强化', content: '确认开课时间和教材寄送。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T01:00:00Z', nextVisit: '2026-11-15' }
   ],
   groups: [
-    { id: 'demo-group-a', name: '演示客户群甲', owner: 'self', ownerName: '演示销售甲', grade: '高三', groupClass: '演示分类甲' },
-    { id: 'demo-group-b', name: '演示客户群乙', owner: 'self', ownerName: '演示销售甲', grade: '高二', groupClass: '演示分类乙' }
+    { id: 'group-a', name: '26届数学联报群', owner: 'self', ownerName: '刘芸', grade: '高三', groupClass: '联报班', members: 128, accountId: 'acc-02' },
+    { id: 'group-b', name: '高三冲刺A班', owner: 'self', ownerName: '刘芸', grade: '高三', groupClass: '冲刺班', members: 96, accountId: 'acc-02' },
+    { id: 'group-c', name: '高二家长咨询群', owner: 'self', ownerName: '刘芸', grade: '高二', groupClass: '咨询群', members: 63, accountId: 'acc-03' }
   ],
   phrases: [
-    { id: 'demo-phrase-a', owner: 'self', title: '演示咨询话术', content: '您好，请问您想咨询哪些产品信息？' },
-    { id: 'demo-phrase-b', owner: 'self', title: '演示回访话术', content: '您好，请问您方便什么时候回访？' }
+    { id: 'phrase-a', owner: 'self', title: '课程介绍', content: '您好，我先为您介绍课程安排、师资和适合的学习阶段。' },
+    { id: 'phrase-b', owner: 'self', title: '回访确认', content: '您好，想跟进一下上次咨询的课程，您还有哪些问题需要我协助？' },
+    { id: 'phrase-c', owner: 'self', title: '合同提醒', content: '合同与课程安排已发送，请您查收，有问题随时联系我。' }
   ],
-  welcome: '演示客户甲，您好！欢迎添加，您可以在这里咨询产品信息。'
+  tasks: [
+    { id: 'task-a', owner: 'self', targets: '重点跟进（18人）', contentKind: 'text', content: '公开课提醒', status: '待员工确认', createdAt: '2026-11-09T04:00:00Z' },
+    { id: 'task-b', owner: 'self', targets: '26届数学联报群', contentKind: 'image', attachment: { name: '课程表.png' }, status: '已完成 126/128', createdAt: '2026-11-08T04:00:00Z' }
+  ],
+  welcome: '您好！欢迎添加警然教育，请告诉我您想咨询的年级和课程。'
 };
 
 export const COMMAND_POLICY = {
-  saveOrder: 'customer', saveRecord: 'customer', saveTask: 'pending', saveTags: 'pending', saveNextVisit: 'customer',
-  savePhrase: 'personal', deletePhrase: 'personal', saveWelcome: 'pending',
-  saveRefund: 'pending', submitTask: 'pending', stopTask: 'pending', renameGroups: 'pending',
-  generateFollowups: 'pending', saveMaterial: 'pending'
+  saveOrder: 'customer', saveRecord: 'customer', saveTask: 'pending', saveTags: 'customer', saveNextVisit: 'customer',
+  savePhrase: 'personal', deletePhrase: 'personal', saveWelcome: 'pending', saveRefund: 'order', submitTask: 'pending',
+  stopTask: 'pending', renameGroups: 'pending', generateFollowups: 'pending', saveMaterial: 'pending'
 };

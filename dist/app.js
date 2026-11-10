@@ -4,6 +4,12 @@ import { renderContentInput, renderModal, renderShell as shell, renderTargetOpti
 
 let state = createState(structuredClone(PREVIEW_DATA));
 let projection = project(state);
+let ui = {
+  activeConversationId: state.conversations[0]?.id ?? '',
+  pinnedConversationIds: new Set(['conv-zhou']),
+  activeAccountId: 'acc-02',
+  composerText: ''
+};
 let previewUrl = null;
 let revision = 0;
 const requests = new WeakMap();
@@ -11,7 +17,7 @@ const root = document.querySelector('#app');
 const modalRoot = document.querySelector('#modal-root');
 const toastRoot = document.querySelector('#toast-root');
 
-const currentRoute = () => resolveRoute(state.role, location.hash.replace('#/', '') || 'customers');
+const currentRoute = () => resolveRoute(state.role, location.hash.replace('#/', '') || 'dashboard');
 const releasePreview = () => {
   if (!previewUrl) return;
   URL.revokeObjectURL(previewUrl);
@@ -21,7 +27,7 @@ const renderShell = () => {
   revision += 1;
   releasePreview();
   projection = project(state);
-  root.innerHTML = shell(currentRoute(), projection);
+  root.innerHTML = shell(currentRoute(), { ...projection, ui });
 };
 const closeModal = () => {
   root.inert = false;
@@ -29,7 +35,7 @@ const closeModal = () => {
 };
 const openModal = (type, id = '') => {
   root.inert = true;
-  modalRoot.innerHTML = renderModal(type, projection, id);
+  modalRoot.innerHTML = renderModal(type, { ...projection, ui }, id);
   modalRoot.querySelector('input:not([type="hidden"]), select, textarea, button')?.focus();
 };
 const showToast = message => {
@@ -45,7 +51,7 @@ const requestFor = form => {
 const formPayload = form => {
   const values = new FormData(form);
   const file = values.get('attachment');
-  const attachment = file?.name ? { name: file.name, size: file.size, type: file.type } : state.taskDraft.attachment;
+  const attachment = file?.name ? { name: file.name, size: file.size, type: file.type } : (form.matches('[data-form="submitTask"]') ? state.taskDraft.attachment : null);
   return { ...Object.fromEntries(values), attachment, targetIds: [...state.targetIds], tags: values.getAll('tags') };
 };
 const command = (type, payload, requestId = crypto.randomUUID()) => {
@@ -67,14 +73,14 @@ const applyFilter = form => {
   renderShell();
 };
 const resetFilter = () => {
-  state = { ...state, filters: { query: '', start: '', end: '', recordKind: '', tag: '' } };
+  state = { ...state, filters: { query: '', start: '', end: '', recordKind: '', tag: '', account: '' } };
   renderShell();
 };
 const changeRole = element => {
   if (!ROLES[element.dataset.role]) return;
   closeModal();
-  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'customers', filters: { query: '', start: '', end: '', recordKind: '', tag: '' }, result: { status: 'idle', message: '' } };
-  location.hash = '#/customers';
+  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'dashboard', filters: { query: '', start: '', end: '', recordKind: '', tag: '', account: '' }, result: { status: 'idle', message: '' } };
+  location.hash = '#/dashboard';
   renderShell();
 };
 const renderTargets = () => {
@@ -114,12 +120,56 @@ const exportCsv = kind => {
 const queryFocus = element => {
   document.querySelector(`[data-query-section="${element.dataset.query}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
 };
+const openCustomerChat = element => {
+  const conversation = state.conversations.find(row => row.customerId === element.dataset.openChat);
+  if (conversation) ui = { ...ui, activeConversationId: conversation.id, activeAccountId: conversation.accountId };
+  closeModal();
+  location.hash = '#/chat';
+};
+const togglePin = element => {
+  const pins = new Set(ui.pinnedConversationIds);
+  const id = element.dataset.togglePin;
+  const wasPinned = pins.has(id);
+  pins[wasPinned ? 'delete' : 'add'](id);
+  ui = { ...ui, pinnedConversationIds: pins };
+  renderShell();
+  showToast(wasPinned ? '已取消置顶' : '已置顶，会话已移到列表顶部');
+};
+const usePhrase = element => {
+  ui = { ...ui, composerText: element.dataset.usePhrase ?? '' };
+  closeModal();
+  renderShell();
+  document.querySelector('#chat-input')?.focus();
+  showToast('快捷回复已填入输入框');
+};
+const sendMessage = () => {
+  const input = document.querySelector('#chat-input');
+  const content = input?.value.trim() || ui.composerText.trim();
+  if (!content) { showToast('请先输入消息'); return; }
+  ui = { ...ui, composerText: '' };
+  if (input) input.value = '';
+  showToast('消息已发送（原型演示）');
+};
+const prototypeAction = element => {
+  const message = element.dataset.prototypeAction || '操作已完成（原型演示）';
+  if (modalRoot.innerHTML) { closeModal(); renderShell(); }
+  showToast(message);
+};
+const setReplyAccount = element => {
+  ui = { ...ui, activeAccountId: element.dataset.setReplyAccount };
+  closeModal();
+  renderShell();
+  showToast(element.dataset.setReplyAccount === 'acc-admin' ? '已切换管理员账号，可使用 @所有人' : '已切换工作账号');
+};
 
 // Declarative UI dispatch. Permission and workflow decisions remain in projection/contracts.
 const CLICKS = new Map([
   ['[data-route]', element => { closeModal(); location.hash = `#/${element.dataset.route}`; }],
-  ['[data-role]', changeRole], ['[data-modal]', element => openModal(element.dataset.modal)],
+  ['[data-role]', changeRole], ['[data-modal]', element => openModal(element.dataset.modal, element.dataset.modalId ?? '')],
   ['[data-close-modal]', closeModal], ['[data-customer]', element => openModal('customer', element.dataset.customer)],
+  ['[data-open-chat]', openCustomerChat], ['[data-conversation]', element => { ui = { ...ui, activeConversationId: element.dataset.conversation }; renderShell(); }],
+  ['[data-toggle-pin]', togglePin], ['[data-use-phrase]', usePhrase], ['[data-send-message]', sendMessage],
+  ['[data-prototype-action]', prototypeAction], ['[data-set-reply-account]', setReplyAccount],
   ['[data-reset-filter]', resetFilter], ['[data-select-targets]', selectTargets],
   ['[data-edit-phrase]', element => openModal('phrase', element.dataset.editPhrase)],
   ['[data-delete-phrase]', element => { command('deletePhrase', { id: element.dataset.deletePhrase }); renderShell(); }],
@@ -143,11 +193,17 @@ const onSubmit = event => {
   entry[1](event.target);
 };
 const onInput = event => {
+  if (event.target.matches('#chat-input')) ui = { ...ui, composerText: event.target.value };
   if (event.target.matches('[name="content"]') && event.target.closest('[data-form="submitTask"]')) {
     state = { ...state, taskDraft: { ...state.taskDraft, content: event.target.value } };
   }
 };
 const onChange = event => {
+  if (event.target.matches('#reply-account')) {
+    ui = { ...ui, activeAccountId: event.target.value };
+    renderShell();
+    showToast(event.target.value === 'acc-admin' ? '已切换管理员账号，可使用 @所有人' : '已切换工作账号');
+  }
   if (event.target.matches('#material-file')) previewMaterial(event.target);
   if (event.target.matches('[name="targetIds"]')) {
     state = updateTargets(state, { ids: [event.target.value], selected: event.target.checked });
@@ -167,6 +223,11 @@ const onChange = event => {
   }
 };
 const onKey = event => {
+  if (event.target.matches('#chat-input') && event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+    return;
+  }
   if (event.key === 'Escape') closeModal();
 };
 const onRoute = () => {
