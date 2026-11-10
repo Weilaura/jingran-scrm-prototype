@@ -36,6 +36,28 @@ test('dashboard aggregates project deal count and amount', () => {
   assert.ok(exported.rows.some(row => row[0] === '2027届高考项目'));
 });
 
+test('sales dashboard keeps common migration dimensions and operating metrics', () => {
+  const data = project(fresh());
+  assert.deepEqual({ customers: data.dashboard.newCustomers, consultations: data.dashboard.consultations, deals: data.dashboard.deals, total: data.dashboard.total, refunds: data.dashboard.refundTotal, net: data.dashboard.net }, { customers: 5, consultations: 3, deals: 3, total: 32580, refunds: 1000, net: 31580 });
+  const html = renderShell('dashboard', { ...data, ui });
+  ['统计开始日期', '成交项目', '企微账号', '归属销售', '客户来源', '新增客户数', '咨询客户数', '成交金额', '退费金额', '净成交金额', '客户转化漏斗', '成交趋势', '客户来源分布', '项目业绩', '销售业绩'].forEach(label => assert.ok(html.includes(label), label));
+});
+
+test('data export provides all common business datasets and stable field headers', () => {
+  const data = project(fresh());
+  const expected = ['customers', 'consultation', 'followups', 'orders', 'refunds', 'tagsGroups', 'performance'];
+  assert.deepEqual(data.exports.map(row => row.id), expected);
+  for (const kind of expected) {
+    const exported = buildExport(data, kind);
+    assert.equal(exported.status, 'ready', kind);
+    assert.ok(exported.headers.length >= 5, kind);
+  }
+  const html = renderShell('export', { ...data, ui });
+  ['数据库迁移字段', '客户基础资料', '咨询记录', '回访记录', '成交明细', '退费申请', '标签与群聊明细', '销售业绩报表', '选择字段', '最近导出记录'].forEach(label => assert.ok(html.includes(label), label));
+  const modal = renderModal('exportFields', { ...data, ui }, 'customers');
+  ['客户ID', '微信号', '客户来源', '迁移必选', 'CSV（兼容 Excel）', '按所选字段导出'].forEach(label => assert.ok(modal.includes(label), label));
+});
+
 test('deal entry retains project, screenshot and post-deal contract status', () => {
   const state = fresh();
   const next = reduce(state, { type: 'saveOrder', requestId: 'new-order', createdAt: '2026-11-10T01:00:00Z', payload: { customerId: 'customer-chen', project: '国际课程项目', product: '雅思强化班', amount: '12800', attachment: { name: '成交截图.png' } } });

@@ -37,18 +37,31 @@ const customerById = (data, id) => data.allCustomers.find(row => row.id === id) 
 const conversationById = data => data.conversations.find(row => row.id === data.ui?.activeConversationId) ?? data.conversations[0];
 
 export const dashboardView = data => {
-  const total = data.orders.reduce((sum, row) => sum + Number(row.amount), 0);
-  const visits = data.allCustomers.filter(row => row.nextVisit).length;
-  return `<div class="overview-grid dashboard-kpis">
-    ${card('成交项目', `<strong class="metric-value">${data.projectPerformance.length}</strong><p>当前授权范围内项目</p>`, button('查看项目明细', 'data-modal="projectDetail"'))}
-    ${card('成交总数', `<strong class="metric-value">${data.orders.length}</strong><p>已录入成交客户</p>`, button('录入成交', 'data-modal="order"'))}
-    ${card('成交金额', `<strong class="metric-value">${money(total)}</strong><p>演示统计口径</p>`)}
-    ${card('待回访', `<strong class="metric-value">${visits}</strong><p>今日、未来及逾期任务</p>`, button('进入回访', 'data-route="followups"'))}
+  const projectItems = Object.fromEntries([['', '全部项目'], ...data.projectOptions.map(project => [project, project])]);
+  const ownerItems = Object.fromEntries([['', '全部销售'], ...data.ownerOptions.map(owner => [owner, owner])]);
+  const sourceItems = Object.fromEntries([['', '全部来源'], ...data.sourceOptions.map(source => [source, source])]);
+  const maxTrend = Math.max(...data.dashboard.trend.map(row => row.amount), 1);
+  const maxSource = Math.max(...data.dashboard.sourceSummary.map(row => row.count), 1);
+  return `<form class="toolbar dashboard-filter" data-filter><div class="filters">${input('start', '统计开始日期', data.filters.start, 'date')}${input('end', '统计结束日期', data.filters.end, 'date')}${select('project', '成交项目', projectItems, data.filters.project)}${select('account', '企微账号', accountOptions(data), data.filters.account)}${select('owner', '归属销售', ownerItems, data.filters.owner)}${select('source', '客户来源', sourceItems, data.filters.source)}</div><div class="filter-actions">${button('重置', 'type="button" data-reset-filter')}${button('查询看板', 'type="submit"', true)}</div></form>
+  <div class="dashboard-scope-note"><span>统计口径</span>客户按添加时间统计；咨询按登记时间统计；成交与退费按业务发生时间统计。所有结果受当前角色和企微账号数据范围限制。</div>
+  <div class="overview-grid dashboard-kpis dashboard-kpis-six">
+    ${card('新增客户数', `<strong class="metric-value">${data.dashboard.newCustomers}</strong><p>当前筛选周期新增联系人</p>`, button('客户明细', 'data-route="customers"'))}
+    ${card('咨询客户数', `<strong class="metric-value">${data.dashboard.consultations}</strong><p>已登记咨询记录的客户</p>`, button('咨询明细', 'data-route="records"'))}
+    ${card('成交单数', `<strong class="metric-value">${data.dashboard.deals}</strong><p>成交转化率 ${data.dashboard.conversion}%</p>`, button('成交明细', 'data-route="transactions"'))}
+    ${card('成交金额', `<strong class="metric-value">${money(data.dashboard.total)}</strong><p>原始成交金额合计</p>`)}
+    ${card('退费金额', `<strong class="metric-value warning">${money(data.dashboard.refundTotal)}</strong><p>审批中与已通过退费</p>`, button('退费明细', 'data-route="transactions"'))}
+    ${card('净成交金额', `<strong class="metric-value success">${money(data.dashboard.net)}</strong><p>成交金额减退费金额</p>`, button('导出业绩', 'data-export="performance"'))}
   </div>
-  <div class="two-column dashboard-main">
-    ${card('项目成交总览', table(['项目', '成交数', '成交金额', '操作'], data.projectPerformance.map(row => [row.project, `${row.count} 单`, money(row.amount), { html: button('查看明细', `data-modal="projectDetail" data-modal-id="${attr(row.project)}"`) }])), button('导出报表', 'data-export="performance"'))}
-    ${card('今日待办', `<div class="todo-list"><button data-route="chat"><span>未回复会话</span><strong>3</strong></button><button data-route="followups"><span>今日应回访</span><strong>2</strong></button><button data-route="transactions"><span>待补合同</span><strong>${data.orders.filter(row => row.contractStatus === '待补录').length}</strong></button><button data-route="transactions"><span>退费审批中</span><strong>${data.refunds.filter(row => row.status === '审批中').length}</strong></button></div>`)}
-  </div>`;
+  <div class="dashboard-analytics">
+    ${card('客户转化漏斗', `<div class="funnel-chart">${data.dashboard.funnel.map((row, index) => `<div style="width:${100 - index * 14}%"><span>${e(row.label)}</span><strong>${row.value} 人</strong></div>`).join('')}</div><div class="funnel-foot"><span>总体成交转化率</span><strong>${data.dashboard.conversion}%</strong></div>`)}
+    ${card('成交趋势', `<div class="trend-chart">${data.dashboard.trend.map(row => `<div class="trend-column"><span class="trend-value">${money(row.amount)}</span><i style="height:${Math.max(18, Math.round(row.amount / maxTrend * 125))}px"></i><b>${row.count} 单</b><small>${e(row.date.slice(5))}</small></div>`).join('') || '<p class="empty-cell">当前筛选范围暂无成交</p>'}</div>`, button('查看成交', 'data-route="transactions"'))}
+    ${card('客户来源分布', `<div class="source-bars">${data.dashboard.sourceSummary.map(row => `<div><span>${e(row.value)}</span><i><b style="width:${Math.round(row.count / maxSource * 100)}%"></b></i><strong>${row.count} 人</strong></div>`).join('')}</div>`, button('查看客户', 'data-route="customers"'))}
+  </div>
+  <div class="two-column dashboard-detail-grid">
+    ${card('项目业绩', table(['项目', '成交数', '成交金额', '退费金额', '净成交金额', '操作'], data.projectPerformance.map(row => [row.project, `${row.count} 单`, money(row.amount), money(row.refund), money(row.net), { html: button('查看明细', `data-modal="projectDetail" data-modal-id="${attr(row.project)}"`) }])), button('导出项目业绩', 'data-export="performance"'))}
+    ${card('销售业绩', table(['销售', '成交数', '成交金额', '目标完成率'], data.dashboard.salesPerformance.map(row => [row.owner, `${row.count} 单`, money(row.amount), `${Math.min(100, Math.round(row.amount / 30000 * 100))}%`])))}
+  </div>
+  ${card('今日待办', `<div class="todo-list todo-list-horizontal"><button data-route="chat"><span>未回复会话</span><strong>3</strong></button><button data-route="followups"><span>今日应回访</span><strong>2</strong></button><button data-route="transactions"><span>待补合同</span><strong>${data.orders.filter(row => row.contractStatus === '待补录').length}</strong></button><button data-route="transactions"><span>退费审批中</span><strong>${data.refunds.filter(row => row.status === '审批中').length}</strong></button></div>`)}`;
 };
 
 const chatMessages = conversation => conversation.type === 'group' ? [
@@ -98,7 +111,29 @@ export const statisticsView = data => `${card('项目成交总数和金额', tab
 export const materialsView = () => `${card('共享素材', `${field('上传素材', '<input id="material-file" type="file" accept="image/*,.pdf,.doc,.docx">')}<div id="material-preview" class="material-preview"></div>${note(PENDING.materials)}${actionButton('保存素材', '素材已保存到本地演示列表', true)}`)}`;
 export const phrasesView = data => `${card('个人快捷回复', table(['名称', '内容', '操作'], data.phrases.map(row => [row.title, row.content, { html: `<div class="action-row">${button('编辑', `data-edit-phrase="${e(row.id)}"`)}${button('删除', `data-delete-phrase="${e(row.id)}"`)}</div>` }])), button('新增话术', 'data-modal="phrase"', true))}`;
 const phraseForm = (data, id = '') => { const phrase = data.phrases.find(row => row.id === id) ?? {}; return form('savePhrase', `<input name="id" type="hidden" value="${e(phrase.id)}">${input('title', '话术名称', phrase.title, 'text', 'required')}${textarea('content', '回复内容', phrase.content, 'required')}`, data.actions.savePhrase.enabled); };
-export const exportView = data => `${card('数据导出', `<div class="overview-grid">${data.exports.map(item => card(item.title, note(`数据范围：${ROLES[data.role].scopeLabel}`), button('导出 CSV', `data-export="${item.id}"`, true))).join('')}</div>`)}${card('当前成交结果', table(['客户', '项目', '金额', '归属销售'], data.orders.map(row => [row.customer, row.project, money(row.amount), row.customerOwner])))}`;
+export const exportView = data => {
+  const projectItems = Object.fromEntries([['', '全部项目'], ...data.projectOptions.map(project => [project, project])]);
+  const ownerItems = Object.fromEntries([['', '全部销售'], ...data.ownerOptions.map(owner => [owner, owner])]);
+  const sourceItems = Object.fromEntries([['', '全部来源'], ...data.sourceOptions.map(source => [source, source])]);
+  const counts = { customers: data.customers.length, consultation: data.recordQueries.consultation.length, followups: data.recordQueries.revisit.length, orders: data.orders.length, refunds: data.refunds.length, tagsGroups: data.customers.length, performance: data.projectPerformance.length };
+  const descriptions = {
+    customers: '客户ID、姓名、微信号、手机、来源、阶段、企微号、归属、标签与群聊',
+    consultation: '咨询项目、咨询内容、登记人、登记时间及下次回访',
+    followups: '回访项目、回访内容、回访人、回访时间及下次回访',
+    orders: '成交项目、产品、金额、渠道、截图、合同状态及客户归属',
+    refunds: '原成交单、退费金额、原因、审批状态和申请时间',
+    tagsGroups: '客户标签、所在群聊、所属企微号及归属销售',
+    performance: '项目成交数、成交金额、退费金额及净成交金额'
+  };
+  return `<form class="toolbar export-filter" data-filter><div class="filters">${input('start', '数据开始日期', data.filters.start, 'date')}${input('end', '数据结束日期', data.filters.end, 'date')}${select('project', '项目', projectItems, data.filters.project)}${select('account', '企微账号', accountOptions(data), data.filters.account)}${select('owner', '归属销售', ownerItems, data.filters.owner)}${select('source', '客户来源', sourceItems, data.filters.source)}</div><div class="filter-actions">${button('重置', 'type="button" data-reset-filter')}${button('应用筛选', 'type="submit"', true)}</div></form>
+  <div class="migration-note"><span>数据库迁移字段</span><div><strong>保留常用基础字段，可直接对应旧系统数据</strong><p>导出字段采用稳定中文表头；客户ID、归属、时间、项目、标签等关键字段默认选中，也可按业务需要自定义。</p></div>${button('查看全部字段', 'data-modal="exportFields" data-modal-id="customers"')}</div>
+  <div class="export-card-grid">${data.exports.map(item => `<section class="export-data-card"><div class="export-data-head"><span>${e(item.title.slice(0, 1))}</span><div><strong>${e(item.title)}</strong><small>${counts[item.id] ?? 0} 条可导出</small></div></div><p>${e(descriptions[item.id])}</p><div class="export-data-actions">${button('选择字段', `data-modal="exportFields" data-modal-id="${e(item.id)}"`)}${button('立即导出', `data-export="${e(item.id)}"`, true)}</div></section>`).join('')}</div>
+  ${card('数据预览', table(['客户', '来源 / 阶段', '企微账号', '归属销售', '添加时间', '标签'], data.customers.slice(0, 5).map(row => [row.name, `${row.source} / ${row.stage}`, row.account, row.ownerName, row.addedAt.slice(0, 10), row.tags.join('、')])), button('配置导出字段', 'data-modal="exportFields" data-modal-id="customers"'))}
+  ${card('最近导出记录', table(['文件名称', '导出类型', '数据范围', '记录数', '操作人', '生成时间', '操作'], [
+    ['客户基础资料_20261109.csv', '客户基础资料', '企微 02号', '126', '刘芸', '2026-11-09 17:26', { html: button('重新下载', 'data-prototype-action="已重新生成客户基础资料文件（原型演示）"') }],
+    ['销售业绩报表_20261108.csv', '销售业绩报表', '全部授权账号', '8', '管理员', '2026-11-08 18:10', { html: button('重新下载', 'data-prototype-action="已重新生成销售业绩报表（原型演示）"') }]
+  ]), button('清理记录', 'data-prototype-action="历史导出记录已清理（原型演示）"'))}`;
+};
 export const settingsView = data => `${card('企微账号', table(['账号', '角色', '同步状态', '操作'], data.accounts.map(row => [row.label, row.role, '同步正常', { html: button('查看', 'data-prototype-action="已打开账号同步详情"') }]))) }${card('标签同步与保留', `<div class="sync-setting"><span class="sync-icon">✓</span><div><strong>保留企业微信原有标签</strong><p>上线首次全量同步读取已有标签；同名标签合并，不会删除企微侧标签。后续每日增量同步。</p></div>${button('查看同步规则', 'data-modal="tagSync"')}</div>`)}${card('角色与数据范围', table(['角色', '范围', '能力'], [[ROLES.admin.label, '全部企微账号', '配置、查看和导出'], [ROLES.supervisor.label, '授权团队', '团队业务管理'], [ROLES.sales.label, '本人授权账号', '本人客户与会话']]))}`;
 
 const views = { dashboard: dashboardView, chat: chatView, customers: customersView, followups: followupsView, records: recordsView, transactions: transactionsView, messages: messagesView, groups: groupsView, statistics: statisticsView, materials: materialsView, phrases: phrasesView, export: exportView, settings: settingsView };
@@ -118,6 +153,10 @@ const mentionAllView = () => `<div class="warning-panel"><strong>确认使用管
 const tagDetailView = (data, tag = '') => { const rows = data.allCustomers.filter(row => row.tags.includes(tag)); return `${note(`标签「${tag}」共 ${rows.length} 人`)}${table(['客户', '企微账号', '归属销售', '添加时间'], rows.map(row => [row.name, row.account, row.ownerName, row.addedAt.slice(0, 10)]))}`; };
 const tagSyncView = () => `<div class="flow-steps"><div class="flow-step done"><b>1</b><div><strong>首次全量读取</strong><p>读取已授权企微账号内客户与已有标签。</p></div></div><div class="flow-step active"><b>2</b><div><strong>保留并去重</strong><p>同名标签合并，不删除企业微信侧原标签。</p></div></div><div class="flow-step"><b>3</b><div><strong>每日增量同步</strong><p>新增、修改标签继续同步，异常可重新补查。</p></div></div></div>${actionButton('模拟立即同步', '标签同步完成：已有标签均已保留（原型演示）', true)}`;
 const projectDetailView = (data, project = '') => { const rows = project ? data.orders.filter(row => row.project === project) : data.orders; return `${note(project ? `项目：${project}` : '全部成交项目')}${table(['客户', '项目', '产品', '金额', '归属销售'], rows.map(row => [row.customer, row.project, row.product, money(row.amount), row.customerOwner]))}`; };
+const exportFieldsView = (data, id = 'customers') => {
+  const definition = data.exports.find(row => row.id === id) ?? data.exports[0];
+  return `<div class="export-fields-head"><div><strong>${e(definition?.title)}</strong><p>常用基础字段默认勾选，方便与旧数据库建立稳定映射。</p></div><span>${definition?.headers.length ?? 0} 个字段</span></div><div class="export-field-toolbar"><label><input type="checkbox" checked> 全选当前分组</label>${button('恢复默认', 'data-prototype-action="已恢复默认导出字段（原型演示）"')}</div><div class="checkbox-grid export-field-grid">${(definition?.headers ?? []).map((header, index) => `<label><input type="checkbox" checked ${index < 3 ? 'disabled' : ''}><span>${e(header)}</span>${index < 3 ? '<small>迁移必选</small>' : ''}</label>`).join('')}</div><div class="export-format-options"><strong>文件格式</strong><label><input type="radio" name="format" checked> CSV（兼容 Excel）</label><label><input type="radio" name="format"> XLSX</label></div><div class="form-actions"><span>敏感字段按当前角色权限脱敏</span><div>${button('保存为常用模板', 'data-prototype-action="已保存为常用导出模板（原型演示）"')}${button('按所选字段导出', `data-export="${e(definition?.id)}"`, true)}</div></div>`;
+};
 
-const MODALS = { order: ['录入成交', dealFormView], refund: ['申请退费', refundForm], record: ['新增咨询记录', recordForm], phrase: ['快捷回复话术', phraseForm], customer: ['客户详情', customerDetail], sessionCapacity: ['会话接入容量说明', sessionCapacity], quickReply: ['选择快捷回复', quickReply], mentionAll: ['管理员群通知', mentionAllView], followup: ['设置回访', followupForm], handover: ['客户交接流程', handoverView], contract: ['后补合同', contractView], proof: ['成交截图', proofView], broadcast: ['新建群发任务', broadcastView], tagDetail: ['标签人数明细', tagDetailView], tagManage: ['标签管理', tagManage], projectDetail: ['项目成交明细', projectDetailView], groupAccount: ['切换群聊回复账号', groupAccountView], tagSync: ['企微标签同步规则', tagSyncView] };
+const MODALS = { order: ['录入成交', dealFormView], refund: ['申请退费', refundForm], record: ['新增咨询记录', recordForm], phrase: ['快捷回复话术', phraseForm], customer: ['客户详情', customerDetail], sessionCapacity: ['会话接入容量说明', sessionCapacity], quickReply: ['选择快捷回复', quickReply], mentionAll: ['管理员群通知', mentionAllView], followup: ['设置回访', followupForm], handover: ['客户交接流程', handoverView], contract: ['后补合同', contractView], proof: ['成交截图', proofView], broadcast: ['新建群发任务', broadcastView], tagDetail: ['标签人数明细', tagDetailView], tagManage: ['标签管理', tagManage], projectDetail: ['项目成交明细', projectDetailView], groupAccount: ['切换群聊回复账号', groupAccountView], tagSync: ['企微标签同步规则', tagSyncView], exportFields: ['选择导出字段', exportFieldsView] };
 export const renderModal = (type, data, id = '') => { const definition = MODALS[type]; if (!definition) return ''; const [title, view] = definition; return `<div class="modal-backdrop" data-modal-backdrop><section class="modal ${['customer', 'projectDetail'].includes(type) ? 'modal-wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title">${e(title)}</h2>${button('关闭', 'data-close-modal')}</div><div class="modal-body">${view(data, id)}</div></section></div>`; };

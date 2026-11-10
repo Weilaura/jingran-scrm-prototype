@@ -27,15 +27,20 @@ export const TARGET_KINDS = { customers: '客户', groups: '客户群' };
 export const TARGET_COLLECTIONS = { customers: 'customers', groups: 'groups' };
 export const CONTENT_INPUTS = { text: 'text', link: 'link', image: 'attachment', file: 'attachment' };
 export const SELECTION_ACTIONS = { true: 'add', false: 'delete' };
-export const FILTER_CONTEXTS = { customers: 'customers', records: 'records', transactions: 'transactions', export: 'transactions', statistics: 'statistics', messages: 'messages' };
+export const FILTER_CONTEXTS = { dashboard: 'dashboard', customers: 'customers', records: 'records', transactions: 'transactions', export: 'export', statistics: 'statistics', messages: 'messages' };
 export const DIMENSIONS = [
   { key: 'grade', label: '年级' }, { key: 'province', label: '生源地' },
   { key: 'school', label: '院校' }, { key: 'account', label: '所属企微号' }
 ];
 export const FOLLOWUP_RULES = ['今日应回访', '未来 7 天', '逾期未回访'];
 export const EXPORTS = {
-  orders: { title: '成交明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '项目', '金额', '客户归属', '登记时间'] },
-  performance: { title: '项目业绩报表', roles: ['supervisor', 'admin'], policy: 'records', headers: ['项目', '成交数', '成交金额'] }
+  customers: { title: '客户基础资料', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户ID', '客户姓名', '微信号', '手机号', '客户来源', '客户阶段', '所属企微号', '归属销售', '添加时间', '标签', '所在群聊'] },
+  consultation: { title: '咨询记录', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '咨询项目', '咨询内容', '登记人', '登记时间', '下次回访'] },
+  followups: { title: '回访记录', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '回访项目', '回访内容', '回访人', '回访时间', '下次回访'] },
+  orders: { title: '成交明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['成交编号', '客户', '项目', '成交产品', '成交金额', '成交渠道', '客户归属', '登记时间', '成交截图', '合同状态'] },
+  refunds: { title: '退费申请', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['退费编号', '原成交单', '客户', '退费金额', '退费原因', '审批状态', '申请时间'] },
+  tagsGroups: { title: '标签与群聊明细', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['客户', '所属企微号', '归属销售', '客户标签', '所在群聊'] },
+  performance: { title: '销售业绩报表', roles: ['sales', 'supervisor', 'admin'], policy: 'records', headers: ['项目', '成交数', '成交金额', '退费金额', '净成交金额'] }
 };
 
 export const PENDING = {
@@ -103,11 +108,11 @@ export const PREVIEW_DATA = {
     { id: 'acc-admin', label: '管理员账号', owner: 'self', role: '管理员' }
   ],
   customers: [
-    { id: 'customer-zhou', name: '周念', wechat: 'nian_2027', phone: '138****7621', owner: 'self', ownerName: '刘芸', grade: '高三', province: '江苏省', school: '南京外国语学校', account: '企微 02号', accountId: 'acc-02', tags: ['26届联报', '数学冲刺', '已成交', '重要客户'], nextVisit: '2026-11-12', addedAt: '2026-11-02T03:20:00Z', groups: ['26届数学联报群', '高三冲刺A班'] },
-    { id: 'customer-chen', name: '陈一诺家长', wechat: 'chenmom88', phone: '139****3368', owner: 'self', ownerName: '刘芸', grade: '高二', province: '浙江省', school: '杭州学军中学', account: '企微 03号', accountId: 'acc-03', tags: ['意向A', '家长', '重点跟进'], nextVisit: '2026-11-11', addedAt: '2026-11-05T06:30:00Z', groups: ['高二家长咨询群'] },
-    { id: 'customer-lin', name: '林夏', wechat: 'linxia07', phone: '137****9021', owner: 'self', ownerName: '刘芸', grade: '高三', province: '上海市', school: '上海中学', account: '企微 02号', accountId: 'acc-02', tags: ['数学强化', '已成交'], nextVisit: '2026-11-15', addedAt: '2026-10-28T02:00:00Z', groups: ['高三冲刺A班'] },
-    { id: 'customer-yuan', name: '袁嘉乐', wechat: 'yuanjl', phone: '136****2180', owner: 'self', ownerName: '刘芸', grade: '高二', province: '湖北省', school: '武汉二中', account: '企微 03号', accountId: 'acc-03', tags: ['未回复', '待跟进'], nextVisit: '2026-11-10', addedAt: '2026-11-08T01:10:00Z', groups: [] },
-    { id: 'customer-wu', name: '吴颖', wechat: 'wuying_9', phone: '135****1042', owner: 'self', ownerName: '刘芸', grade: '高一', province: '安徽省', school: '合肥一中', account: '企微 02号', accountId: 'acc-02', tags: ['新客户'], nextVisit: '2026-11-13', addedAt: '2026-11-09T04:40:00Z', groups: ['新客咨询群'] }
+    { id: 'customer-zhou', name: '周念', wechat: 'nian_2027', phone: '138****7621', source: '老客转介绍', stage: '已成交', owner: 'self', ownerName: '刘芸', grade: '高三', province: '江苏省', school: '南京外国语学校', account: '企微 02号', accountId: 'acc-02', tags: ['26届联报', '数学冲刺', '已成交', '重要客户'], nextVisit: '2026-11-12', addedAt: '2026-11-02T03:20:00Z', groups: ['26届数学联报群', '高三冲刺A班'] },
+    { id: 'customer-chen', name: '陈一诺家长', wechat: 'chenmom88', phone: '139****3368', source: '抖音直播', stage: '重点意向', owner: 'self', ownerName: '刘芸', grade: '高二', province: '浙江省', school: '杭州学军中学', account: '企微 03号', accountId: 'acc-03', tags: ['意向A', '家长', '重点跟进'], nextVisit: '2026-11-11', addedAt: '2026-11-05T06:30:00Z', groups: ['高二家长咨询群'] },
+    { id: 'customer-lin', name: '林夏', wechat: 'linxia07', phone: '137****9021', source: '小红书', stage: '已成交', owner: 'self', ownerName: '刘芸', grade: '高三', province: '上海市', school: '上海中学', account: '企微 02号', accountId: 'acc-02', tags: ['数学强化', '已成交'], nextVisit: '2026-11-15', addedAt: '2026-10-28T02:00:00Z', groups: ['高三冲刺A班'] },
+    { id: 'customer-yuan', name: '袁嘉乐', wechat: 'yuanjl', phone: '136****2180', source: '公众号', stage: '待跟进', owner: 'self', ownerName: '刘芸', grade: '高二', province: '湖北省', school: '武汉二中', account: '企微 03号', accountId: 'acc-03', tags: ['未回复', '待跟进'], nextVisit: '2026-11-10', addedAt: '2026-11-08T01:10:00Z', groups: [] },
+    { id: 'customer-wu', name: '吴颖', wechat: 'wuying_9', phone: '135****1042', source: '线下讲座', stage: '新客户', owner: 'self', ownerName: '刘芸', grade: '高一', province: '安徽省', school: '合肥一中', account: '企微 02号', accountId: 'acc-02', tags: ['新客户'], nextVisit: '2026-11-13', addedAt: '2026-11-09T04:40:00Z', groups: ['新客咨询群'] }
   ],
   conversations: [
     { id: 'conv-zhou', customerId: 'customer-zhou', name: '周念', short: '周', color: '#e88a72', type: 'direct', accountId: 'acc-02', time: '10:24', preview: '好的老师，我晚点把合同发您', unread: 2, important: true },
@@ -117,9 +122,9 @@ export const PREVIEW_DATA = {
     { id: 'conv-yuan', customerId: 'customer-yuan', name: '袁嘉乐', short: '袁', color: '#d4a04f', type: 'direct', accountId: 'acc-03', time: '昨天', preview: '暂未回复', unread: 0 }
   ],
   orders: [
-    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', amount: 16800, contractStatus: '待补录', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
-    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', amount: 8800, contractStatus: '已上传', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
-    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', amount: 6980, contractStatus: '待补录', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
+    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', amount: 16800, channel: '企业微信收款', contractStatus: '待补录', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
+    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', amount: 8800, channel: '银行转账', contractStatus: '已上传', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
+    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', amount: 6980, channel: '企业微信收款', contractStatus: '待补录', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
   ],
   refunds: [
     { id: 'RF20261109003', owner: 'self', orderId: 'CJ202611070044', customer: '陈一诺家长', amount: 1000, reason: '课程调整', status: '审批中', createdAt: '2026-11-09T05:30:00Z' }

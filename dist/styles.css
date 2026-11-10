@@ -683,3 +683,70 @@ button { cursor: pointer; }
   .sync-banner .btn, .sync-setting .btn { grid-column: 1 / -1; }
   .form-grid, .proof-preview, .detail-grid { grid-template-columns: 1fr; }
 }
+
+/* Video-confirmed principle: keep common fields stable for legacy data migration. */
+.dashboard-scope-note { display: flex; align-items: center; gap: 10px; margin: -2px 0 16px; padding: 10px 14px; border: 1px solid #dfe2ee; border-radius: 10px; color: #69738a; background: #fafbfe; font-size: 11px; line-height: 1.6; }
+.dashboard-scope-note span { flex: 0 0 auto; padding: 4px 7px; border-radius: 6px; color: var(--primary); background: var(--primary-soft); font-weight: 700; }
+.dashboard-kpis-six { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.dashboard-kpis-six .section-card { position: relative; overflow: hidden; }
+.dashboard-kpis-six .section-card::after { content: ""; position: absolute; right: -25px; bottom: -35px; width: 95px; height: 95px; border-radius: 50%; background: rgba(91,91,214,.05); }
+.metric-value.success { color: var(--teal); }
+.dashboard-analytics { display: grid; grid-template-columns: minmax(240px,.8fr) minmax(360px,1.35fr) minmax(250px,.85fr); gap: 16px; }
+.dashboard-analytics > .section-card { min-height: 315px; }
+.funnel-chart { display: grid; justify-items: center; gap: 8px; padding: 4px 0 10px; }
+.funnel-chart > div { min-height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; clip-path: polygon(6% 0,94% 0,100% 100%,0 100%); color: #fff; background: linear-gradient(90deg,#5b5bd6,#7f80ea); }
+.funnel-chart > div:nth-child(2) { background: linear-gradient(90deg,#6073d9,#8091ea); }
+.funnel-chart > div:nth-child(3) { background: linear-gradient(90deg,#4c91bd,#65b0cf); }
+.funnel-chart > div:nth-child(4) { background: linear-gradient(90deg,#2f9b84,#4eb8a1); }
+.funnel-chart span { font-size: 11px; }
+.funnel-chart strong { font-size: 13px; }
+.funnel-foot { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px dashed var(--line); color: #69738a; }
+.funnel-foot strong { color: var(--primary); font-size: 18px; }
+.trend-chart { min-height: 205px; display: flex; align-items: flex-end; justify-content: space-around; gap: 12px; padding: 22px 8px 0; border-bottom: 1px solid var(--line); }
+.trend-column { height: 205px; min-width: 72px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; }
+.trend-column i { width: 42px; min-height: 18px; border-radius: 7px 7px 2px 2px; background: linear-gradient(180deg,#7474e5,#5151c8); box-shadow: 0 8px 18px rgba(81,81,200,.18); }
+.trend-column .trend-value { color: #69738a; font-size: 9px; }
+.trend-column b { color: #4d5770; font-size: 10px; }
+.trend-column small { color: #969eaf; }
+.source-bars { display: grid; gap: 18px; padding: 6px 0; }
+.source-bars > div { display: grid; grid-template-columns: 76px minmax(80px,1fr) 42px; align-items: center; gap: 9px; font-size: 10px; }
+.source-bars i { height: 8px; overflow: hidden; border-radius: 8px; background: #edf0f5; }
+.source-bars i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--teal),#63cbb3); }
+.source-bars strong { text-align: right; }
+.dashboard-detail-grid { grid-template-columns: minmax(0,1.4fr) minmax(330px,.6fr); }
+.todo-list-horizontal { grid-template-columns: repeat(4,minmax(0,1fr)); }
+
+.migration-note { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 14px; margin-bottom: 16px; padding: 15px 16px; border: 1px solid #bfe5db; border-radius: 13px; color: #4f6f67; background: linear-gradient(90deg,#effbf7,#f7fcfa); }
+.migration-note > span { padding: 7px 10px; border-radius: 8px; color: #fff; background: var(--teal); font-size: 11px; font-weight: 700; }
+.migration-note strong { display: block; color: #315f54; }
+.migration-note p { margin: 5px 0 0; font-size: 11px; line-height: 1.6; }
+.export-card-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-bottom: 18px; }
+.export-data-card { min-height: 190px; display: flex; flex-direction: column; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow-sm); }
+.export-data-head { display: flex; align-items: center; gap: 11px; }
+.export-data-head > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: var(--primary); background: var(--primary-soft); font-weight: 800; }
+.export-data-head strong, .export-data-head small { display: block; }
+.export-data-head small { margin-top: 4px; color: var(--muted); }
+.export-data-card > p { flex: 1; margin: 16px 0; color: #737d94; font-size: 11px; line-height: 1.7; }
+.export-data-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.export-fields-head { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 15px; padding: 14px; border-radius: 10px; background: #f7f8fc; }
+.export-fields-head strong { display: block; font-size: 14px; }
+.export-fields-head p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+.export-fields-head > span { align-self: center; color: var(--primary); font-weight: 700; }
+.export-field-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.export-field-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.export-field-grid label { min-height: 48px; }
+.export-field-grid small { margin-left: auto; color: var(--teal); font-size: 9px; }
+.export-format-options { display: flex; align-items: center; gap: 18px; margin-top: 16px; padding: 13px; border: 1px solid var(--line); border-radius: 10px; }
+.export-format-options label { display: flex; align-items: center; gap: 6px; color: #5f6980; }
+
+@media (max-width: 1320px) {
+  .dashboard-analytics { grid-template-columns: 1fr 1fr; }
+  .dashboard-analytics > .section-card:nth-child(3) { grid-column: 1 / -1; }
+  .export-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 900px) {
+  .dashboard-kpis-six, .dashboard-analytics, .export-card-grid, .todo-list-horizontal { grid-template-columns: 1fr; }
+  .dashboard-analytics > .section-card:nth-child(3) { grid-column: auto; }
+  .migration-note { grid-template-columns: 1fr; }
+  .export-field-grid { grid-template-columns: 1fr; }
+}
