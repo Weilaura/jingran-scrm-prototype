@@ -8,6 +8,7 @@ let ui = {
   activeConversationId: state.conversations[0]?.id ?? '',
   pinnedConversationIds: new Set(['conv-zhou']),
   activeAccountId: 'acc-02',
+  chatTab: 'all',
   composerText: ''
 };
 let previewUrl = null;
@@ -161,6 +162,19 @@ const setReplyAccount = element => {
   renderShell();
   showToast(element.dataset.setReplyAccount === 'acc-admin' ? '已切换管理员账号，可使用 @所有人' : '已切换工作账号');
 };
+const setChatTab = element => {
+  const chatTab = element.dataset.chatTab;
+  const match = {
+    all: () => true,
+    unread: row => row.unread > 0,
+    group: row => row.type === 'group'
+  }[chatTab];
+  if (!match) return;
+  const visible = projection.conversations.filter(match);
+  const activeConversationId = visible.some(row => row.id === ui.activeConversationId) ? ui.activeConversationId : (visible[0]?.id ?? '');
+  ui = { ...ui, chatTab, activeConversationId };
+  renderShell();
+};
 
 // Declarative UI dispatch. Permission and workflow decisions remain in projection/contracts.
 const CLICKS = new Map([
@@ -169,6 +183,7 @@ const CLICKS = new Map([
   ['[data-close-modal]', closeModal], ['[data-customer]', element => openModal('customer', element.dataset.customer)],
   ['[data-open-chat]', openCustomerChat], ['[data-conversation]', element => { ui = { ...ui, activeConversationId: element.dataset.conversation }; renderShell(); }],
   ['[data-toggle-pin]', togglePin], ['[data-use-phrase]', usePhrase], ['[data-send-message]', sendMessage],
+  ['[data-chat-tab]', setChatTab],
   ['[data-prototype-action]', prototypeAction], ['[data-set-reply-account]', setReplyAccount],
   ['[data-reset-filter]', resetFilter], ['[data-select-targets]', selectTargets],
   ['[data-edit-phrase]', element => openModal('phrase', element.dataset.editPhrase)],

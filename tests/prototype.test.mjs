@@ -5,7 +5,7 @@ import { buildExport, createState, project, reduce, resolveRoute } from '../dist
 import { renderModal, renderShell } from '../dist/views.js';
 
 const fresh = () => createState(structuredClone(PREVIEW_DATA));
-const ui = { activeConversationId: 'conv-zhou', pinnedConversationIds: new Set(['conv-zhou']), activeAccountId: 'acc-02', composerText: '' };
+const ui = { activeConversationId: 'conv-zhou', pinnedConversationIds: new Set(['conv-zhou']), activeAccountId: 'acc-02', chatTab: 'all', composerText: '' };
 
 test('navigation exposes the detailed SCRM workbench requested by the product owner', () => {
   const ids = ROUTES.map(row => row.id);
@@ -112,6 +112,17 @@ test('all role routes render and the chat page includes every key workbench inte
   const groupChat = renderShell('chat', { ...data, ui: { ...ui, activeConversationId: 'conv-group', activeAccountId: 'acc-admin' } });
   assert.ok(groupChat.includes('@所有人'));
   assert.ok(groupChat.includes('本次回复身份'));
+});
+
+test('chat tabs filter all, unanswered and group conversations', () => {
+  const data = project(fresh());
+  const renderTab = (chatTab, activeConversationId = 'conv-zhou') => renderShell('chat', { ...data, ui: { ...ui, chatTab, activeConversationId } });
+  assert.equal((renderTab('all').match(/data-conversation=/g) ?? []).length, 5);
+  assert.equal((renderTab('unread').match(/data-conversation=/g) ?? []).length, 3);
+  const group = renderTab('group', 'conv-group');
+  assert.equal((group.match(/data-conversation=/g) ?? []).length, 1);
+  assert.ok(group.includes('data-chat-tab="group"'));
+  assert.ok(group.includes('aria-selected="true" data-chat-tab="group"'));
 });
 
 test('customer, deal, follow-up, group-send and settings pages expose requested details', () => {
