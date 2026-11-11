@@ -1,6 +1,6 @@
-import { COMMAND_POLICY, CONSULTATION_EXPORT_FIELDS, CUSTOMER_EXPORT_FIELDS, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PAYMENT_EXPORT_FIELDS, PERFORMANCE_EXPORT_FIELDS, PENDING, RECORD_KINDS, REFUND_EXPORT_FIELDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT, WEEKLY_INTENT_EXPORT_FIELDS } from './contracts.js?v=20261110-export-hub';
+import { COMMAND_POLICY, CONSULTATION_EXPORT_FIELDS, CUSTOMER_EXPORT_FIELDS, CUSTOMERS, DIMENSIONS, EXPORTS, FILTER_CONTEXTS, PAYMENT_EXPORT_FIELDS, PERFORMANCE_EXPORT_FIELDS, PENDING, RECORD_KINDS, REFUND_EXPORT_FIELDS, ROLES, ROUTES, SELECTION_ACTIONS, TARGET_COLLECTIONS, TEXT, WEEKLY_INTENT_EXPORT_FIELDS } from './contracts.js?v=20261111-doc-update';
 
-const blankFilters = () => ({ query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' });
+const blankFilters = () => ({ query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', tags: [], account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' });
 
 /** @param {object} input Normalized local preview snapshot; never a provider payload. */
 export const createState = (input = {}) => ({
@@ -24,6 +24,7 @@ const localDate = value => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Sh
 const dateMatch = (row, filters, key = 'createdAt') => (!filters.start || localDate(row[key]) >= filters.start) && (!filters.end || localDate(row[key]) <= filters.end);
 const customerFilter = (row, filters) => textMatch(row, filters.query)
   && (!filters.tag || row.tags.includes(filters.tag))
+  && (!(filters.tags ?? []).length || filters.tags.every(tag => tag === '__untagged__' ? row.tags.length === 0 : row.tags.includes(tag)))
   && (!filters.account || row.accountId === filters.account)
   && (!filters.owner || row.ownerName === filters.owner)
   && (!filters.source || row.source === filters.source)
@@ -173,6 +174,7 @@ export const project = state => {
     actions: Object.fromEntries(Object.entries(COMMAND_POLICY).map(([type, policy]) => [type, { enabled: availability[policy]({ scope, customers: allCustomers, orders }) }])),
     recordQueries: Object.fromEntries(Object.keys(RECORD_KINDS).map(kind => [kind, records.filter(row => row.kind === kind)])),
     refunds, tasks, phrases: state.phrases.filter(row => row.owner === state.actorId), groups,
+    projectCatalog: state.projectCatalog ?? [], productCatalog: state.productCatalog ?? [],
     welcome: state.welcome, result: state.result, targetKind: state.targetKind, contentKind: state.contentKind, targetIds: state.targetIds, taskDraft: state.taskDraft,
     tagOptions: [...new Set(allCustomers.flatMap(row => row.tags))], targets: { customers, groups }[state.targetKind] ?? [],
     followup: { status: 'ready', message: PENDING.followup, tasks: allCustomers.filter(row => row.nextVisit) },
@@ -209,7 +211,8 @@ export const activateRoute = (state, route) => {
 const outcome = (state, status, message) => ({ ...state, result: { status, message } });
 const fail = (state, message = TEXT.invalid) => outcome(state, 'error', message);
 const decision = (status, extra = {}) => ({ status, ...extra });
-const validCustomer = (state, payload) => state.customers.find(item => item.id === payload.customerId && resolveScope(state).owners.has(item.owner));
+const validCustomer = (state, payload) => state.customers.find(item => item.id === payload.customerId && resolveScope(state).owners.has(item.owner))
+  ?? (payload.customerId === 'manual' && payload.manualCustomer?.trim() ? { id: `manual-${payload.manualCustomer.trim()}`, name: payload.manualCustomer.trim(), owner: state.actorId, ownerName: TEXT.currentActor, grade: payload.grade || '未填写', province: payload.province || '未填写', school: payload.school || '未填写' } : null);
 const validOrder = (state, payload) => state.orders.find(item => item.id === payload.orderId && resolveScope(state).owners.has(item.owner));
 const PERMISSIONS = {
   customer: (state, payload) => decision('ready', { customer: validCustomer(state, payload) }),
@@ -232,7 +235,9 @@ const saveOrder = (state, command, resolved) => {
     customerOwner: resolved.customer.ownerName ?? resolved.customer.owner, project: payload.project?.trim() || '未分类项目',
     product: payload.product.trim(), amount: money(payload.amount), owner: resolved.customer.owner,
     channel: ({ wecom: '企业微信收款', bank: '银行转账', other: '其他' })[payload.channel] || payload.channel || '未填写',
-    contractStatus: '待补录', proofName: payload.attachment?.name || '未上传'
+    contractStatus: '待补录', arrivalStatus: '待确认', reviewStatus: '待财务/管理员确认',
+    grade: payload.grade || resolved.customer.grade || '未填写', province: payload.province || resolved.customer.province || '未填写', school: payload.school || resolved.customer.school || '未填写',
+    proofName: payload.attachment?.name || '未上传'
   };
   return accepted(state, command, { orders: [row, ...state.orders] });
 };
@@ -241,13 +246,14 @@ const saveRecord = (state, command, resolved) => {
   if (!resolved.customer) return fail(state, TEXT.denied);
   if (!RECORD_KINDS[payload.kind] || !payload.content?.trim()) return fail(state);
   if (payload.nextVisit && !/^\d{4}-\d{2}-\d{2}$/.test(payload.nextVisit)) return fail(state);
+  const previous = payload.id ? state.records.find(item => item.id === payload.id && item.customerId === resolved.customer.id) : null;
   const row = {
-    ...baseRow(state, command), recordedBy: state.actorId, recordedByName: TEXT.currentActor, customerId: resolved.customer.id,
+    ...baseRow(state, command), ...previous, id: previous?.id || command.requestId, recordedBy: state.actorId, recordedByName: TEXT.currentActor, customerId: resolved.customer.id,
     customer: resolved.customer.name, kind: payload.kind, project: payload.project?.trim() || '未填写项目', content: payload.content.trim(),
-    nextVisit: payload.nextVisit ?? '', owner: resolved.customer.owner
+    intentLevel: payload.intentLevel || '中', grade: payload.grade || resolved.customer.grade || '未填写', nextVisit: payload.nextVisit ?? '', owner: resolved.customer.owner
   };
   const updatedCustomer = { ...resolved.customer, nextVisit: payload.nextVisit || resolved.customer.nextVisit || '' };
-  return accepted(state, command, { records: [row, ...state.records], customers: state.customers.map(item => item.id === updatedCustomer.id ? updatedCustomer : item) });
+  return accepted(state, command, { records: [row, ...state.records.filter(item => item.id !== row.id)], customers: state.customers.map(item => item.id === updatedCustomer.id ? updatedCustomer : item) });
 };
 const saveRefund = (state, command, resolved) => {
   const { payload } = command;

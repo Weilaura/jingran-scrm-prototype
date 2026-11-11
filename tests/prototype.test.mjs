@@ -190,3 +190,35 @@ test('creating a state never mutates the refresh fixtures', () => {
   assert.equal(next.customers.find(row => row.id === 'customer-zhou').nextVisit, '2026-12-01');
   assert.equal(PREVIEW_DATA.customers.find(row => row.id === 'customer-zhou').nextVisit, original);
 });
+
+test('document-confirmed details are present without adding routes', () => {
+  const data = project(fresh());
+  assert.equal(ROUTES.length, 13);
+  const customers = renderShell('customers', { ...data, ui });
+  ['未打标签', '支持模糊输入', '客户标签（可多选）', '标签人数及明细'].forEach(label => assert.ok(customers.includes(label), label));
+  const followups = renderShell('followups', { ...data, ui });
+  ['回访开始日期', '企微账号', '上次咨询记录', '回访记录'].forEach(label => assert.ok(followups.includes(label), label));
+  const chat = renderShell('chat', { ...data, ui });
+  ['邀请进群', '表情', '直接拖入', '咨询记录', '回访记录'].forEach(label => assert.ok(chat.includes(label), label));
+  const transactions = renderShell('transactions', { ...data, ui });
+  ['未补录合同', '审核状态', '金额（锁定）', '删除废单', '申请退费'].forEach(label => assert.ok(transactions.includes(label), label));
+  const groups = renderShell('groups', { ...data, ui });
+  assert.ok(groups.includes('一键修改群名'));
+  const dashboard = renderShell('dashboard', { ...data, ui });
+  assert.ok(dashboard.includes('data-modal="salesPerformance"'));
+});
+
+test('document-confirmed modals expose history, multi-select, drag upload and review details', () => {
+  const data = project(fresh());
+  const consultation = renderModal('consultationHistory', data, 'customer-zhou');
+  ['历史咨询记录', '更新最新记录', '新增本次记录', '意向', '年级'].forEach(label => assert.ok(consultation.includes(label), label));
+  const followup = renderModal('followupHistory', data, 'customer-zhou');
+  assert.ok(followup.includes('历次回访时间和结果'));
+  assert.equal((followup.match(/课程方案|合同跟进/g) || []).length >= 2, true);
+  const order = renderModal('order', data, 'customer-zhou');
+  ['非企微客户姓名', '院校', '省份', '管理员预设', '直接拖入成交截图', '提交审核'].forEach(label => assert.ok(order.includes(label), label));
+  const broadcast = renderModal('broadcast', data);
+  ['客户标签（可多选）', '群发文字', '链接（选填）', '图片（选填）'].forEach(label => assert.ok(broadcast.includes(label), label));
+  const target = renderModal('targetSetting', data);
+  ['刘芸', '莎莎', '双燕', '小迪'].forEach(label => assert.ok(target.includes(label), label));
+});

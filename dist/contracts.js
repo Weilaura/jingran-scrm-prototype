@@ -118,11 +118,11 @@ export const PREVIEW_DATA = {
     { id: 'acc-admin', label: '管理员账号', owner: 'self', role: '管理员' }
   ],
   customers: [
-    { id: 'customer-zhou', name: '周念', wechat: 'nian_2027', phone: '138****7621', source: '老客转介绍', stage: '已成交', owner: 'self', ownerName: '刘芸', grade: '高三', province: '江苏省', school: '南京外国语学校', account: '企微 02号', accountId: 'acc-02', tags: ['26届联报', '数学冲刺', '已成交', '重要客户'], nextVisit: '2026-11-12', addedAt: '2026-11-02T03:20:00Z', groups: ['26届数学联报群', '高三冲刺A班'] },
+    { id: 'customer-zhou', name: '周念', wechat: 'nian_2027', phone: '138****7621', source: '老客转介绍', stage: '已成交', owner: 'self', ownerName: '刘芸', grade: '高三', province: '江苏省', school: '南京外国语学校', account: '企微 02号', accountId: 'acc-02', duplicateAccounts: ['企微 03号'], tags: ['26届联报', '数学冲刺', '已成交', '重要客户'], nextVisit: '2026-11-12', addedAt: '2026-11-02T03:20:00Z', groups: ['26届数学联报群', '高三冲刺A班'] },
     { id: 'customer-chen', name: '陈一诺家长', wechat: 'chenmom88', phone: '139****3368', source: '抖音直播', stage: '重点意向', owner: 'self', ownerName: '刘芸', grade: '高二', province: '浙江省', school: '杭州学军中学', account: '企微 03号', accountId: 'acc-03', tags: ['意向A', '家长', '重点跟进'], nextVisit: '2026-11-11', addedAt: '2026-11-05T06:30:00Z', groups: ['高二家长咨询群'] },
     { id: 'customer-lin', name: '林夏', wechat: 'linxia07', phone: '137****9021', source: '小红书', stage: '已成交', owner: 'self', ownerName: '刘芸', grade: '高三', province: '上海市', school: '上海中学', account: '企微 02号', accountId: 'acc-02', tags: ['数学强化', '已成交'], nextVisit: '2026-11-15', addedAt: '2026-10-28T02:00:00Z', groups: ['高三冲刺A班'] },
     { id: 'customer-yuan', name: '袁嘉乐', wechat: 'yuanjl', phone: '136****2180', source: '公众号', stage: '待跟进', owner: 'self', ownerName: '刘芸', grade: '高二', province: '湖北省', school: '武汉二中', account: '企微 03号', accountId: 'acc-03', tags: ['未回复', '待跟进'], nextVisit: '2026-11-10', addedAt: '2026-11-08T01:10:00Z', groups: [] },
-    { id: 'customer-wu', name: '吴颖', wechat: 'wuying_9', phone: '135****1042', source: '线下讲座', stage: '新客户', owner: 'self', ownerName: '刘芸', grade: '高一', province: '安徽省', school: '合肥一中', account: '企微 02号', accountId: 'acc-02', tags: ['新客户'], nextVisit: '2026-11-13', addedAt: '2026-11-09T04:40:00Z', groups: ['新客咨询群'] }
+    { id: 'customer-wu', name: '吴颖', wechat: 'wuying_9', phone: '135****1042', source: '线下讲座', stage: '新客户', owner: 'self', ownerName: '刘芸', grade: '高一', province: '安徽省', school: '合肥一中', account: '企微 02号', accountId: 'acc-02', tags: [], nextVisit: '2026-11-13', addedAt: '2026-11-09T04:40:00Z', groups: ['新客咨询群'] }
   ],
   conversations: [
     { id: 'conv-zhou', customerId: 'customer-zhou', name: '周念', short: '周', color: '#e88a72', type: 'direct', accountId: 'acc-02', time: '10:24', preview: '好的老师，我晚点把合同发您', unread: 2, important: true },
@@ -132,18 +132,19 @@ export const PREVIEW_DATA = {
     { id: 'conv-yuan', customerId: 'customer-yuan', name: '袁嘉乐', short: '袁', color: '#d4a04f', type: 'direct', accountId: 'acc-03', time: '昨天', preview: '暂未回复', unread: 0 }
   ],
   orders: [
-    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', classType: '联报班', package: '数学 + 英语联报', subcategory: '高考冲刺', amount: 16800, paymentType: '警然教育', orderType: '新签', referralTeacher: '王老师', regionBatch: '华东 / 26届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '已到账', enteredBy: '刘芸', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
-    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', classType: '高级班', package: '英语强化套餐', subcategory: '英语', amount: 8800, paymentType: '警然教育', orderType: '新签', referralTeacher: '—', regionBatch: '华东 / 26届', channel: '银行转账', contractStatus: '已上传', ownershipStatus: '已归属', arrivalStatus: '已到账', enteredBy: '刘芸', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
-    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', classType: '会员班', package: '英语能力提升', subcategory: '国际课程', amount: 6980, paymentType: '警然教育', orderType: '续费', referralTeacher: '陈老师', regionBatch: '华东 / 27届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '待确认', enteredBy: '刘芸', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
+    { id: 'CJ202611090018', owner: 'self', customerId: 'customer-zhou', customer: '周念', customerOwner: '刘芸', project: '2027届高考项目', product: '高三数学冲刺 + 联报', classType: '联报班', package: '数学 + 英语联报', subcategory: '高考冲刺', amount: 16800, paymentType: '警然教育', orderType: '新签', referralTeacher: '王老师', regionBatch: '华东 / 26届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '已到账', reviewStatus: '已确认', enteredBy: '刘芸', proofName: '微信收款截图.png', createdAt: '2026-11-09T02:12:00Z' },
+    { id: 'CJ202611080061', owner: 'self', customerId: 'customer-lin', customer: '林夏', customerOwner: '刘芸', project: '2027届高考项目', product: '高三英语强化班', classType: '高级班', package: '英语强化套餐', subcategory: '英语', amount: 8800, paymentType: '警然教育', orderType: '新签', referralTeacher: '—', regionBatch: '华东 / 26届', channel: '银行转账', contractStatus: '已上传', ownershipStatus: '已归属', arrivalStatus: '已到账', reviewStatus: '已确认', enteredBy: '刘芸', proofName: '成交凭证.jpg', createdAt: '2026-11-08T09:40:00Z' },
+    { id: 'CJ202611070044', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', customerOwner: '刘芸', project: '国际课程项目', product: '英语能力提升班', classType: '会员班', package: '英语能力提升', subcategory: '国际课程', amount: 6980, paymentType: '警然教育', orderType: '续费', referralTeacher: '陈老师', regionBatch: '华东 / 27届', channel: '企业微信收款', contractStatus: '待补录', ownershipStatus: '已归属', arrivalStatus: '待确认', reviewStatus: '待财务/管理员确认', enteredBy: '刘芸', proofName: '转账截图.png', createdAt: '2026-11-07T06:21:00Z' }
   ],
   refunds: [
     { id: 'RF20261109003', owner: 'self', orderId: 'CJ202611070044', customer: '陈一诺家长', amount: 1000, reason: '课程调整', status: '审批中', createdAt: '2026-11-09T05:30:00Z' }
   ],
   records: [
-    { id: 'record-a', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'consultation', project: '高三数学冲刺', content: '咨询压轴题提分和联报课程安排。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T02:00:00Z', nextVisit: '2026-11-12' },
-    { id: 'record-b', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'revisit', project: '合同跟进', content: '已发送课程方案，等待确认合同。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T03:00:00Z', nextVisit: '2026-11-12' },
-    { id: 'record-c', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', kind: 'consultation', project: '国际课程项目', content: '咨询英语能力提升与付款节点。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-07T06:30:00Z', nextVisit: '2026-11-11' },
-    { id: 'record-d', owner: 'self', customerId: 'customer-lin', customer: '林夏', kind: 'revisit', project: '高三英语强化', content: '确认开课时间和教材寄送。', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T01:00:00Z', nextVisit: '2026-11-15' }
+    { id: 'record-a', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'consultation', project: '高三数学冲刺', content: '咨询压轴题提分和联报课程安排。', intentLevel: '高', grade: '高三', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T02:00:00Z', nextVisit: '2026-11-12' },
+    { id: 'record-b', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'revisit', project: '合同跟进', content: '已发送课程方案，等待确认合同。', intentLevel: '高', grade: '高三', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T03:00:00Z', nextVisit: '2026-11-12' },
+    { id: 'record-b2', owner: 'self', customerId: 'customer-zhou', customer: '周念', kind: 'revisit', project: '课程方案确认', content: '家长已查看课程方案，计划本周确认合同。', intentLevel: '高', grade: '高三', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-10T03:00:00Z', nextVisit: '2026-11-12' },
+    { id: 'record-c', owner: 'self', customerId: 'customer-chen', customer: '陈一诺家长', kind: 'consultation', project: '国际课程项目', content: '咨询英语能力提升与付款节点。', intentLevel: '中', grade: '高二', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-07T06:30:00Z', nextVisit: '2026-11-11' },
+    { id: 'record-d', owner: 'self', customerId: 'customer-lin', customer: '林夏', kind: 'revisit', project: '高三英语强化', content: '确认开课时间和教材寄送。', intentLevel: '中', grade: '高三', recordedBy: 'self', recordedByName: '刘芸', createdAt: '2026-11-09T01:00:00Z', nextVisit: '2026-11-15' }
   ],
   groups: [
     { id: 'group-a', name: '26届数学联报群', owner: 'self', ownerName: '刘芸', grade: '高三', groupClass: '联报班', members: 128, accountId: 'acc-02' },
@@ -159,6 +160,8 @@ export const PREVIEW_DATA = {
     { id: 'task-a', owner: 'self', targets: '重点跟进（18人）', contentKind: 'text', content: '公开课提醒', status: '待员工确认', createdAt: '2026-11-09T04:00:00Z' },
     { id: 'task-b', owner: 'self', targets: '26届数学联报群', contentKind: 'image', attachment: { name: '课程表.png' }, status: '已完成 126/128', createdAt: '2026-11-08T04:00:00Z' }
   ],
+  projectCatalog: ['2027届高考项目', '国际课程项目'],
+  productCatalog: ['高三数学冲刺 + 联报', '高三英语强化班', '英语能力提升班'],
   welcome: '您好！欢迎添加警然教育，请告诉我您想咨询的年级和课程。'
 };
 

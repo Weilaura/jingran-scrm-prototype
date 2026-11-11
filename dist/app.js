@@ -1,6 +1,6 @@
-import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js?v=20261110-export-hub';
-import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js?v=20261110-export-hub';
-import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261110-view-buttons';
+import { CONTENT_KINDS, PREVIEW_DATA, ROLES, TARGET_KINDS, TEXT } from './contracts.js?v=20261111-doc-update';
+import { activateRoute, buildExport, createState, project, reduce, resolveRoute, selectTargets as updateTargets } from './projection.js?v=20261111-doc-update';
+import { renderContentInput, renderModal, renderShell as shell, renderTargetOptions } from './views.js?v=20261111-doc-update';
 
 let state = createState(structuredClone(PREVIEW_DATA));
 let projection = project(state);
@@ -73,18 +73,19 @@ const saveForm = form => {
   FORM_OUTCOMES[result.status](result);
 };
 const applyFilter = form => {
-  const values = Object.fromEntries(new FormData(form));
-  state = { ...state, filters: { ...state.filters, ...values }, result: { status: 'idle', message: '' } };
+  const data = new FormData(form);
+  const values = Object.fromEntries(data);
+  state = { ...state, filters: { ...state.filters, ...values, tags: data.getAll('tags') }, result: { status: 'idle', message: '' } };
   renderShell();
 };
 const resetFilter = () => {
-  state = { ...state, filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' } };
+  state = { ...state, filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', tags: [], account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' } };
   renderShell();
 };
 const changeRole = element => {
   if (!ROLES[element.dataset.role]) return;
   closeModal();
-  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'dashboard', filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' }, result: { status: 'idle', message: '' } };
+  state = { ...state, role: element.dataset.role, targetIds: new Set(), filterContexts: new Map(), filterContext: 'dashboard', filters: { query: '', start: '', end: '', month: '2026-11', recordKind: '', tag: '', tags: [], account: '', project: '', owner: '', source: '', grade: '', school: '', province: '' }, result: { status: 'idle', message: '' } };
   location.hash = '#/dashboard';
   renderShell();
 };
@@ -218,9 +219,35 @@ const onSubmit = event => {
 };
 const onInput = event => {
   if (event.target.matches('#chat-input')) ui = { ...ui, composerText: event.target.value };
+  if (event.target.matches('[data-tag-search]')) {
+    const query = event.target.value.trim().toLocaleLowerCase();
+    event.target.closest('.modal-body, form')?.querySelectorAll('[data-tag-option]').forEach(option => { option.hidden = !option.textContent.toLocaleLowerCase().includes(query); });
+  }
+  if (event.target.matches('[data-catalog-search]')) {
+    const select = document.querySelector(`#${event.target.dataset.catalogSearch}`);
+    const query = event.target.value.trim().toLocaleLowerCase();
+    select?.querySelectorAll('option').forEach(option => { option.hidden = !!query && !option.textContent.toLocaleLowerCase().includes(query); });
+  }
   if (event.target.matches('[name="content"]') && event.target.closest('[data-form="submitTask"]')) {
     state = { ...state, taskDraft: { ...state.taskDraft, content: event.target.value } };
   }
+};
+const onDragOver = event => {
+  const zone = event.target.closest('[data-dropzone]');
+  if (!zone) return;
+  event.preventDefault();
+  zone.classList.add('dragging');
+};
+const onDragLeave = event => event.target.closest('[data-dropzone]')?.classList.remove('dragging');
+const onDrop = event => {
+  const zone = event.target.closest('[data-dropzone]');
+  if (!zone) return;
+  event.preventDefault();
+  zone.classList.remove('dragging');
+  const names = [...event.dataTransfer.files].map(file => file.name);
+  const label = zone.querySelector('[data-drop-label]');
+  if (label) label.textContent = names.length ? `已拖入：${names.join('、')}` : '未识别文件';
+  showToast(names.length ? `已拖入 ${names.length} 个文件（原型演示）` : '请拖入截图或文件');
 };
 const onChange = event => {
   if (event.target.matches('#reply-account')) {
@@ -268,6 +295,9 @@ const dispose = () => {
   document.removeEventListener('input', onInput);
   document.removeEventListener('change', onChange);
   document.removeEventListener('keydown', onKey);
+  document.removeEventListener('dragover', onDragOver);
+  document.removeEventListener('dragleave', onDragLeave);
+  document.removeEventListener('drop', onDrop);
   window.removeEventListener('hashchange', onRoute);
 };
 
@@ -277,6 +307,9 @@ const attach = () => {
   document.addEventListener('input', onInput);
   document.addEventListener('change', onChange);
   document.addEventListener('keydown', onKey);
+  document.addEventListener('dragover', onDragOver);
+  document.addEventListener('dragleave', onDragLeave);
+  document.addEventListener('drop', onDrop);
   window.addEventListener('hashchange', onRoute);
   window.addEventListener('pagehide', dispose, { once: true });
 };
